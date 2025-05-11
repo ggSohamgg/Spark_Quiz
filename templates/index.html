@@ -232,10 +232,41 @@
       .then(data => {
         document.querySelector('.loading').style.display = 'none';
         if (data.quiz && data.quiz.length) {
+          // Check if the first item is an error message
+          if (data.quiz[0].question.startsWith("Error:")) {
+            document.getElementById('quiz-output').value = `${data.quiz[0].question}\n\n${data.quiz[0].explanation}`;
+            return;
+          }
+
           // Format the quiz output as a continuous text string for the textarea
           let quizText = "Your Quiz\n\n";
+          // Add the topic as a heading
+          quizText += `### ${parameters.topic} Quiz\n\n------------------------\n\n`;
+
+          // Keep track of the number of each question type to assign labels
+          let mcqIndex = 0, shortIndex = 0, tfIndex = 0;
           data.quiz.forEach((q, i) => {
-            quizText += `Question ${i + 1}\n${q.question}\n`;
+            // Determine the question type based on its structure
+            let questionType = "";
+            if (q.options.length > 0) {
+              // Check if it's a True/False question (options are "True" and "False")
+              if (q.options.length === 2 && q.options.some(opt => opt.includes("True")) && q.options.some(opt => opt.includes("False"))) {
+                questionType = "True/False";
+                tfIndex++;
+              } else {
+                // Otherwise, assume it's a Multiple Choice question
+                questionType = "Multiple Choice";
+                mcqIndex++;
+              }
+            } else {
+              // No options means it's a Short Answer question
+              questionType = "Short Answer";
+              shortIndex++;
+            }
+
+            quizText += `Question ${i + 1}\n`;
+            quizText += `**${questionType} Question:**\n`;
+            quizText += `${q.question}\n`;
             if (q.options && q.options.length) {
               quizText += "Options:\n";
               q.options.forEach(opt => {
@@ -259,6 +290,7 @@
         document.querySelector('.loading').style.display = 'none';
         document.querySelector('.error').style.display = 'block';
         document.querySelector('.error').textContent = "An error occurred: " + err.message;
+        document.getElementById('quiz-output').value = `Error: An error occurred while generating the quiz.\n\n${err.message}`;
       });
     });
   </script>
