@@ -129,7 +129,7 @@
       </div>
     </section>
     <footer>
-      &copy; 2025 SparkQuiz &mdash; Crafted with <span aria-label="love">❤️</span> for learning.
+      © 2025 SparkQuiz — Crafted with <span aria-label="love">❤️</span> for learning.
     </footer>
   </div>
   <script>
@@ -150,6 +150,8 @@
 
     // FORM SUBMISSION: Validate max 15 per type, then send per-type quantities to Flask
     document.getElementById('quiz-form').addEventListener('submit', function(e) {
+      e.preventDefault(); // Always prevent default form submission
+
       let mcqVal = document.getElementById('type-mcq').checked ? parseInt(document.getElementById('mcq-quantity').value || "0") : 0;
       let shortVal = document.getElementById('type-short').checked ? parseInt(document.getElementById('short-quantity').value || "0") : 0;
       let tfVal = document.getElementById('type-truefalse').checked ? parseInt(document.getElementById('truefalse-quantity').value || "0") : 0;
@@ -157,8 +159,7 @@
       // Validation: no more than 15 for any type
       if (mcqVal > 15 || shortVal > 15 || tfVal > 15) {
         alert("Maximum allowed per category is 15.");
-        e.preventDefault();
-        return;
+        return; // Stop submission if validation fails
       }
 
       const topic = document.getElementById('topic').value;
