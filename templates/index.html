@@ -6,28 +6,21 @@
   <title>SparkQuiz</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Main font and heading/button font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <header>
       <h1 class="spark-heading">
         <span class="spark-gradient">SparkQuiz</span>
         <span class="spark-underline"></span>
       </h1>
     </header>
-
-    <!-- Info Box -->
     <section class="info-box" aria-live="polite">
       Instantly generate custom quizzes for any subject. Select your preferences below!
     </section>
-
-    <!-- Main Form Fields -->
     <form class="main-fields" id="quiz-form" autocomplete="off">
-      <!-- Row 1: Topic & Difficulty -->
       <div class="row">
         <div class="input-group">
           <label for="topic">Topic <span class="field-desc">(e.g., "Quantum Physics")</span></label>
@@ -43,23 +36,7 @@
           </select>
         </div>
       </div>
-
-      <!-- Row 2: Number & Question Types -->
       <div class="row">
-        <div class="input-group">
-          <label for="quantity">Number of Questions <span class="field-desc">(e.g., 3)</span></label>
-          <input
-            type="number"
-            id="quantity"
-            name="quantity"
-            min="1"
-            max="50"
-            value="3"
-            class="quantity-field"
-            required
-          />
-          <div id="quantity-error" aria-live="polite"></div>
-        </div>
         <div class="question-types-container">
           <span style="font-weight:500; margin-bottom:8px;">Desired Question Types <span class="field-desc">(select one or more)</span></span>
           <div class="question-types-row">
@@ -70,7 +47,7 @@
               </label>
               <div class="type-quantity" id="mcq-quantity-box">
                 <label for="mcq-quantity" class="quantity-label">How many Multiple Choice?</label>
-                <input type="number" id="mcq-quantity" name="mcq-quantity" min="1" max="50" value="1" />
+                <input type="number" id="mcq-quantity" name="mcq-quantity" min="1" max="50" value="1" class="quantity-input-custom" />
               </div>
               <label class="checkbox-label">
                 <input type="checkbox" name="type-short" id="type-short" />
@@ -78,7 +55,7 @@
               </label>
               <div class="type-quantity" id="short-quantity-box" style="display:none;">
                 <label for="short-quantity" class="quantity-label">How many Short Answer?</label>
-                <input type="number" id="short-quantity" name="short-quantity" min="1" max="50" value="1" />
+                <input type="number" id="short-quantity" name="short-quantity" min="1" max="50" value="1" class="quantity-input-custom" />
               </div>
               <label class="checkbox-label">
                 <input type="checkbox" name="type-truefalse" id="type-truefalse" />
@@ -86,14 +63,12 @@
               </label>
               <div class="type-quantity" id="truefalse-quantity-box" style="display:none;">
                 <label for="truefalse-quantity" class="quantity-label">How many True/False?</label>
-                <input type="number" id="truefalse-quantity" name="truefalse-quantity" min="1" max="50" value="1" />
+                <input type="number" id="truefalse-quantity" name="truefalse-quantity" min="1" max="50" value="1" class="quantity-input-custom" />
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Advanced Options -->
       <details class="advanced-options">
         <summary>Advanced Options</summary>
         <div class="advanced-content">
@@ -138,30 +113,18 @@
           </div>
         </div>
       </details>
-
-      <!-- Generate Button -->
       <div class="btn-center">
         <button type="submit" class="main-btn">Generate Quiz</button>
       </div>
     </form>
-
-    <!-- Quiz Output -->
-    <section id="quiz-output" aria-live="polite">
-      <!-- Quiz questions will be dynamically inserted here -->
-    </section>
-
-    <!-- Loading & Error Messages -->
+    <section id="quiz-output" aria-live="polite"></section>
     <div class="loading" style="display:none;">Generating your quiz...</div>
     <div class="error" style="display:none;"></div>
-
-    <!-- About Box -->
     <section class="about-box">
-      SparkQuiz leverages <b>Qwen2.5-72B-Instruct</b>, a state-of-the-art large language model by Alibaba Cloud, to create custom quizzes effortlessly for any subject, audience, or language.
-      <br>
+      SparkQuiz is powered by free OpenRouter (Qwen2.5-72B-Instruct) &mdash; 10 requests per minute, 50 per day.<br>
+      If not working, please wait until the next day.<br>
       <a class="about-link" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct" target="_blank" rel="noopener">Check the model card: Qwen2.5-72B-Instruct</a>
     </section>
-
-    <!-- Footer -->
     <footer>
       &copy; 2025 SparkQuiz &mdash; Crafted with <span aria-label="love">❤️</span> for learning.
     </footer>
@@ -176,11 +139,90 @@
     toggleQuantityBox('type-mcq', 'mcq-quantity-box');
     toggleQuantityBox('type-short', 'short-quantity-box');
     toggleQuantityBox('type-truefalse', 'truefalse-quantity-box');
-    // On page load, show/hide based on initial state
     window.addEventListener('DOMContentLoaded', function() {
       document.getElementById('mcq-quantity-box').style.display = document.getElementById('type-mcq').checked ? 'block' : 'none';
       document.getElementById('short-quantity-box').style.display = document.getElementById('type-short').checked ? 'block' : 'none';
       document.getElementById('truefalse-quantity-box').style.display = document.getElementById('type-truefalse').checked ? 'block' : 'none';
+    });
+
+    // FORM SUBMISSION: Send per-type quantities to Flask
+    document.getElementById('quiz-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const topic = document.getElementById('topic').value;
+      const difficulty = document.getElementById('difficulty').value;
+      const subtopics = document.getElementById('subtopics').value.split(',').map(s => s.trim()).filter(Boolean);
+      const keywords = document.getElementById('context').value.split(',').map(s => s.trim()).filter(Boolean);
+      const audience = document.getElementById('audience').value;
+      const language = document.getElementById('language').value || "en";
+      const max_length = document.getElementById('max-length').value;
+      const include_explanations = document.querySelector('input[name="include-explanations"]:checked').value === "yes";
+
+      // Gather checked types and their counts
+      const question_types = [];
+      const type_counts = {};
+      if (document.getElementById('type-mcq').checked) {
+        question_types.push("Multiple Choice");
+        type_counts["Multiple Choice"] = parseInt(document.getElementById('mcq-quantity').value || "1");
+      }
+      if (document.getElementById('type-short').checked) {
+        question_types.push("Short Answer");
+        type_counts["Short Answer"] = parseInt(document.getElementById('short-quantity').value || "1");
+      }
+      if (document.getElementById('type-truefalse').checked) {
+        question_types.push("True/False");
+        type_counts["True/False"] = parseInt(document.getElementById('truefalse-quantity').value || "1");
+      }
+
+      // Compose parameters
+      const parameters = {
+        topic,
+        difficulty,
+        subtopics,
+        keywords,
+        audience,
+        language,
+        max_length,
+        include_explanations,
+        question_types,
+        type_counts
+      };
+
+      // Show loading
+      document.querySelector('.loading').style.display = '';
+      document.querySelector('.error').style.display = 'none';
+      document.getElementById('quiz-output').innerHTML = '';
+
+      fetch('/generate_quiz', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(parameters)
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.querySelector('.loading').style.display = 'none';
+        if (data.quiz && data.quiz.length) {
+          let html = '';
+          data.quiz.forEach((q, i) => {
+            html += `<div class="question-card"><div><b>Q${i+1}:</b> ${q.question}</div>`;
+            if (q.options && q.options.length) {
+              html += `<ul>`;
+              q.options.forEach(opt => html += `<li>${opt}</li>`);
+              html += `</ul>`;
+            }
+            if (q.answer) html += `<div class="answer">Answer: ${q.answer}</div>`;
+            if (q.explanation) html += `<div class="explanation">${q.explanation}</div>`;
+            html += `</div>`;
+          });
+          document.getElementById('quiz-output').innerHTML = html;
+        } else {
+          document.getElementById('quiz-output').innerHTML = '<div class="error">No quiz generated.</div>';
+        }
+      })
+      .catch(err => {
+        document.querySelector('.loading').style.display = 'none';
+        document.querySelector('.error').style.display = '';
+        document.querySelector('.error').textContent = "An error occurred. Please try again later.";
+      });
     });
   </script>
 </body>
