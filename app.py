@@ -61,7 +61,7 @@ def generate_quiz(parameters):
     }
     try:
         # Send the prompt to OpenRouter and get the response
-        response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=90)
+        response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=180)  # Increased to 3 minutes
         response.raise_for_status()
         data = response.json()
         # Extract the quiz text from the API response
@@ -129,6 +129,5 @@ def quiz_api():
     return jsonify({"quiz": quiz})
 
 if __name__ == "__main__":
-    # Run the Flask app (for development only; use a production WSGI server for deployment)
     port = int(os.environ.get("PORT", 8000))
-    app.run(host="0.0.0.0", port=port,debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)
