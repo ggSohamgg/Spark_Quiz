@@ -13,34 +13,17 @@ def generate_quiz(parameters):
     """
     Build the prompt from user parameters, send to OpenRouter API,
     and parse the response into a list of questions.
-    Returns a dictionary with the quiz title and questions.
     """
     # Validate that at least one question is requested
     total_questions = sum(parameters['type_counts'].get(t, 0) for t in parameters['question_types'])
     if total_questions <= 0:
-        return {
-            "title": "Error Quiz",
-            "questions": [{
-                "question": "Error: Please request at least one question.",
-                "options": [],
-                "answer": "",
-                "explanation": "No questions were requested. Please select at least one question type with a quantity greater than 0.",
-                "type": ""
-            }]
-        }
-
-    # Check if API key is set
-    if not OPENROUTER_API_KEY:
-        return {
-            "title": "Error Quiz",
-            "questions": [{
-                "question": "Error: API key not configured.",
-                "options": [],
-                "answer": "",
-                "explanation": "The OPENROUTER_API_KEY environment variable is not set. Please configure it to use the OpenRouter API.",
-                "type": ""
-            }]
-        }
+        return [{
+            "question": "Error: Please request at least one question.",
+            "options": [],
+            "answer": "",
+            "explanation": "No questions were requested. Please select at least one question type with a quantity greater than 0.",
+            "type": ""
+        }]
 
     prompt = f"Generate a quiz with the following parameters:\n"
     prompt += f"- Topic: {parameters['topic']}\n"
@@ -68,7 +51,6 @@ def generate_quiz(parameters):
         "3. For multiple choice questions, label options as A), B), C), D)\n"
         "4. If explanations are requested, include them after each question\n"
         "5. Make sure all information is factually correct\n"
-        "6. Ensure each question's answer matches its explanation, and place the explanation after the answer.\n"
     )
 
     headers = {
@@ -87,39 +69,25 @@ def generate_quiz(parameters):
         data = response.json()
         quiz_text = data["choices"][0]["message"]["content"]
         print(f"Raw API Response: {quiz_text}")  # Debug: Log the raw response
-
-        # Extract the title from the quiz_text (e.g., ### World War 1 History Quiz)
-        title_match = re.match(r"^###\s*(.+?)(?:\n|$)", quiz_text, re.MULTILINE)
-        title = title_match.group(1).strip() if title_match else "Quiz"
-
         questions = parse_quiz_text(quiz_text)
         if not questions:
-            return {
-                "title": title,
-                "questions": [{
-                    "question": "Error: No questions generated.",
-                    "options": [],
-                    "answer": "",
-                    "explanation": "The API did not return any valid questions. This might be due to rate limits (10 requests/min, 50/day) or an unexpected response format.",
-                    "type": ""
-                }]
-            }
-        return {
-            "title": title,
-            "questions": questions
-        }
-    except requests.exceptions.RequestException as e:
-        print(f"Error from OpenRouter API: {e}")
-        return {
-            "title": "Error Quiz",
-            "questions": [{
-                "question": "Error: Failed to generate quiz.",
+            return [{
+                "question": "Error: No questions generated.",
                 "options": [],
                 "answer": "",
-                "explanation": f"API request failed: {str(e)}. This might be due to rate limits (10 requests/min, 50/day) or an invalid API key.",
+                "explanation": "The API did not return any valid questions. This might be due to rate limits (10 requests/min, 50/day) or an unexpected response format.",
                 "type": ""
             }]
-        }
+        return questions
+    except requests.exceptions.RequestException as e:
+        print(f"Error from OpenRouter API: {e}")
+        return [{
+            "question": "Error: Failed to generate quiz.",
+            "options": [],
+            "answer": "",
+            "explanation": f"API request failed: {str(e)}. This might be due to rate limits (10 requests/min, 50/day) or an invalid API key.",
+            "type": ""
+        }]
 
 def parse_quiz_text(quiz_text):
     """
@@ -127,48 +95,57 @@ def parse_quiz_text(quiz_text):
     Each question includes its type, options, answer, and explanation.
     """
     if not quiz_text or not quiz_text.strip():
-        print("Debug: quiz_text is empty or None")
         return []  # Return empty list if quiz_text is empty
 
     questions = []
-    # Split the text into sections based on #### headings, preserving the headings in the split
-    sections = re.split(r"(?=^####\s.*$)", quiz_text, flags=re.MULTILINE)
+    # Split the text into sections based on #### headings
+    sections = re.split(r"(?m)^####\s.*$", quiz_text)
     sections = [section.strip() for section in sections if section.strip()]
-    print(f"Debug: Split sections: {sections}")
 
-    # The first section might be the topic heading (### Topic Quiz), remove it if present
+    # The first section might be the topic heading (### Topic Quiz), remove it
     if sections and sections[0].startswith("###"):
         sections.pop(0)
 
-    # Process each section as a question block
-    for section in sections:
-        # Extract the question heading (#### Question X: Type)
-        heading_match = re.match(r"####\s*Question\s*\d+:\s*(Multiple Choice|Short Answer|True/False)", section, re.IGNORECASE)
-        if not heading_match:
-            print(f"Debug: Skipping section, no valid heading found: {section[:100]}...")
-            continue
+    # Each remaining section should be a question block
+    question_blocks = []
+    current_block = None
+    for i, section in enumerate(sections):
+        # Extract the question heading (#### Question X: Type) from the original text
+        heading_match = re.search(r"####\s.*?(?=\n)", quiz_text)
+        if heading_match:
+            heading = heading_match.group(0)
+            match = re.match(r"#### Question \d+: (Multiple Choice|Short Answer|True/False)", heading)
+            if match:
+                if current_block:
+                    question_blocks.append(current_block)
+                current_block = {"section": section, "type": match.group(1)}
+        else:
+            # Append to the current block if no heading is found
+            if current_block:
+                current_block["section"] += "\n" + section
 
-        question_type = heading_match.group(1)
-        # Remove the heading from the section content
-        section_content = section[heading_match.end():].strip()
-        print(f"Debug: Processing section for type {question_type}: {section_content[:100]}...")
+        # Update the position in the text for the next heading match
+        if heading_match:
+            quiz_text = quiz_text[heading_match.end():]
 
-        q = {"question": "", "options": [], "answer": "", "explanation": "", "type": question_type}
-        lines = section_content.split("\n")
+    if current_block:
+        question_blocks.append(current_block)
+
+    for block in question_blocks:
+        section = block["section"]
+        q = {"question": "", "options": [], "answer": "", "explanation": "", "type": block["type"]}
+        lines = section.split("\n")
         in_options = False
         in_explanation = False
 
-        for i, line in enumerate(lines):
+        for line in lines:
             line = line.strip()
             if not line:
                 continue
 
-            # Detect the question text (first non-empty line after the heading, or wrapped in **)
-            if not q["question"]:
-                if line.startswith("**") and line.endswith("**"):
-                    q["question"] = line.strip("**")
-                else:
-                    q["question"] = line
+            # Detect the question text (starts with ** and ends with **)
+            if line.startswith("**") and line.endswith("**"):
+                q["question"] = line.strip("**")
                 continue
 
             # Detect options (A), B), etc.)
@@ -177,27 +154,15 @@ def parse_quiz_text(quiz_text):
                 in_options = True
                 continue
 
-            # Detect answer line (case-insensitive)
-            if re.match(r"(?i)^(\*\*)?answer:(\*\*)?\s*", line):
-                answer_text = re.split(r"(?i)^(\*\*)?answer:(\*\*)?\s*", line, 1)[-1].strip()
-                # Remove ** markers if they exist
-                if answer_text.startswith("**") and answer_text.endswith("**"):
-                    answer_text = answer_text.strip("**").strip()
-                # Only update the answer if we haven't already set it (to handle duplicates)
-                if not q["answer"]:
-                    q["answer"] = answer_text
-                else:
-                    print(f"Debug: Found duplicate answer in section, keeping last: {answer_text}")
+            # Detect answer line
+            if line.lower().startswith("**answer:**"):
+                q["answer"] = line.split(":", 1)[-1].strip()
                 in_options = False
                 continue
 
-            # Detect explanation line (case-insensitive)
-            if re.match(r"(?i)^(\*\*)?explanation:(\*\*)?\s*", line):
-                explanation_text = re.split(r"(?i)^(\*\*)?explanation:(\*\*)?\s*", line, 1)[-1].strip()
-                # Remove ** markers if they exist
-                if explanation_text.startswith("**") and explanation_text.endswith("**"):
-                    explanation_text = explanation_text.strip("**").strip()
-                q["explanation"] = explanation_text
+            # Detect explanation line
+            if line.lower().startswith("**explanation:**"):
+                q["explanation"] = line.split(":", 1)[-1].strip()
                 in_options = False
                 in_explanation = True
                 continue
@@ -219,12 +184,8 @@ def parse_quiz_text(quiz_text):
                     if opt.startswith(q["answer"] + ")"):
                         q["answer"] = opt
                         break
-            print(f"Debug: Parsed question: {q}")
             questions.append(q)
-        else:
-            print(f"Debug: Skipped section, no question text found: {section[:100]}...")
 
-    print(f"Debug: Final questions list: {questions}")
     return questions
 
 @app.route("/")
@@ -235,22 +196,9 @@ def index():
 @app.route("/generate_quiz", methods=["POST"])
 def quiz_api():
     """Receive quiz parameters from the frontend, generate the quiz, and return as JSON."""
-    try:
-        parameters = request.json
-        result = generate_quiz(parameters)
-        return jsonify(result)
-    except Exception as e:
-        print(f"Error in quiz_api: {str(e)}")
-        return jsonify({
-            "title": "Error Quiz",
-            "questions": [{
-                "question": "Error: Server error occurred.",
-                "options": [],
-                "answer": "",
-                "explanation": f"An unexpected error occurred on the server: {str(e)}",
-                "type": ""
-            }]
-        }), 500
+    parameters = request.json
+    quiz = generate_quiz(parameters)
+    return jsonify({"quiz": quiz})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
