@@ -11,46 +11,51 @@
         <h1>🧠 AI Quiz Generator</h1>
         <div id="usage-info" class="info-box"></div>
         <form id="quiz-form">
-            <label>Topic:</label>
-            <input type="text" name="topic" required placeholder="e.g. Quantum Physics">
+            <div class="main-fields">
+                <label>Topic:</label>
+                <input type="text" name="topic" required placeholder="e.g. Quantum Physics">
 
-            <label>Difficulty:</label>
-            <select name="difficulty">
-                <option value="easy">Easy</option>
-                <option value="medium" selected>Medium</option>
-                <option value="hard">Hard</option>
-            </select>
+                <label>Difficulty:</label>
+                <select name="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
 
-            <label>Number of Questions:</label>
-            <input type="number" name="num_questions" min="1" max="10" value="5">
+                <label>Number of Questions:</label>
+                <input type="number" name="num_questions" min="1" max="10" value="5">
 
-            <label>Question Types:</label>
-            <select name="question_types" multiple size="3">
-                <option value="multiple choice" selected>Multiple Choice</option>
-                <option value="short answer">Short Answer</option>
-                <option value="true/false">True/False</option>
-            </select>
+                <label>Question Types:</label>
+                <select name="question_types" multiple size="3">
+                    <option value="multiple choice" selected>Multiple Choice</option>
+                    <option value="short answer">Short Answer</option>
+                    <option value="true/false">True/False</option>
+                </select>
+            </div>
 
-            <label>Specific Sub-topics (optional, comma separated):</label>
-            <input type="text" name="subtopics" placeholder="e.g. Wave-particle duality, Quantum entanglement">
+            <details class="advanced-options">
+                <summary>Advanced Options</summary>
+                <label>Specific Sub-topics (optional, comma separated):</label>
+                <input type="text" name="subtopics" placeholder="e.g. Wave-particle duality, Quantum entanglement">
 
-            <label>Context Keywords (optional, comma separated):</label>
-            <input type="text" name="keywords" placeholder="e.g. experiment, theory, equation">
+                <label>Context Keywords (optional, comma separated):</label>
+                <input type="text" name="keywords" placeholder="e.g. experiment, theory, equation">
 
-            <label>Target Audience (optional):</label>
-            <input type="text" name="audience" placeholder="e.g. Undergraduate Physics Students">
+                <label>Target Audience (optional):</label>
+                <input type="text" name="audience" placeholder="e.g. Undergraduate Physics Students">
 
-            <label>Language (optional):</label>
-            <input type="text" name="language" placeholder="e.g. en (default English)">
+                <label>Language (optional):</label>
+                <input type="text" name="language" placeholder="e.g. en (default English)">
 
-            <label>Include Explanations?</label>
-            <select name="include_explanations">
-                <option value="yes" selected>Yes</option>
-                <option value="no">No</option>
-            </select>
+                <label>Include Explanations?</label>
+                <select name="include_explanations">
+                    <option value="yes" selected>Yes</option>
+                    <option value="no">No</option>
+                </select>
 
-            <label>Maximum Length per Question (optional, in words):</label>
-            <input type="number" name="max_length" min="0" placeholder="e.g. 30">
+                <label>Maximum Length per Question (optional, in words):</label>
+                <input type="number" name="max_length" min="0" placeholder="e.g. 30">
+            </details>
 
             <button type="submit">Generate Quiz</button>
         </form>
@@ -68,7 +73,6 @@
         <p>Made with ❤️ for learning. &copy; 2025</p>
     </footer>
     <script>
-    // Show usage info
     async function fetchUsage() {
         const resp = await fetch('/usage');
         const data = await resp.json();
@@ -86,12 +90,10 @@
     }
     fetchUsage();
 
-    // Handle quiz form submission
     document.getElementById('quiz-form').onsubmit = async function(e) {
         e.preventDefault();
         const form = e.target;
         const formData = new FormData(form);
-        // Parse multiple selects and comma-separated fields
         const question_types = formData.getAll('question_types');
         const subtopics = formData.get('subtopics') ? formData.get('subtopics').split(',').map(s => s.trim()).filter(Boolean) : [];
         const keywords = formData.get('keywords') ? formData.get('keywords').split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -137,7 +139,7 @@
             html += "<div class='error'>Sorry, no quiz could be generated.</div>";
         }
         document.getElementById('quiz-output').innerHTML = html;
-        fetchUsage(); // update usage info after quiz generation
+        fetchUsage();
     }
     </script>
 </body>
