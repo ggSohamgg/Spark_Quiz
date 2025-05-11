@@ -25,6 +25,16 @@ def generate_quiz(parameters):
             "type": ""
         }]
 
+    # Check if API key is set
+    if not OPENROUTER_API_KEY:
+        return [{
+            "question": "Error: API key not configured.",
+            "options": [],
+            "answer": "",
+            "explanation": "The OPENROUTER_API_KEY environment variable is not set. Please configure it to use the OpenRouter API.",
+            "type": ""
+        }]
+
     prompt = f"Generate a quiz with the following parameters:\n"
     prompt += f"- Topic: {parameters['topic']}\n"
     prompt += f"- Difficulty: {parameters['difficulty']}\n"
@@ -51,6 +61,7 @@ def generate_quiz(parameters):
         "3. For multiple choice questions, label options as A), B), C), D)\n"
         "4. If explanations are requested, include them after each question\n"
         "5. Make sure all information is factually correct\n"
+        "6. Ensure each question's answer matches its explanation, and place the explanation after the answer.\n"
     )
 
     headers = {
@@ -100,8 +111,8 @@ def parse_quiz_text(quiz_text):
 
     questions = []
     # Split the text into sections based on #### headings, preserving the headings in the split
-    # Use a positive lookahead to include the delimiter in the split sections
-    sections = re.split(r"(?=(?m)^####\s.*$)", quiz_text)
+    # Use re.MULTILINE flag instead of embedding (?m) in the pattern
+    sections = re.split(r"(?=^####\s.*$)", quiz_text, flags=re.MULTILINE)
     sections = [section.strip() for section in sections if section.strip()]
     print(f"Debug: Split sections: {sections}")
 
@@ -204,9 +215,21 @@ def index():
 @app.route("/generate_quiz", methods=["POST"])
 def quiz_api():
     """Receive quiz parameters from the frontend, generate the quiz, and return as JSON."""
-    parameters = request.json
-    quiz = generate_quiz(parameters)
-    return jsonify({"quiz": quiz})
+    try:
+        parameters = request.json
+        quiz = generate_quiz(parameters)
+        return jsonify({"quiz": quiz})
+    except Exception as e:
+        print(f"Error in quiz_api: {str(e)}")
+        return jsonify({
+            "quiz": [{
+                "question": "Error: Server error occurred.",
+                "options": [],
+                "answer": "",
+                "explanation": f"An unexpected error occurred on the server: {str(e)}",
+                "type": ""
+            }]
+        }), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
