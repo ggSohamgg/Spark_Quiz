@@ -69,6 +69,7 @@ def get_openrouter_usage():
     headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}"}
     try:
         response = requests.get(url, headers=headers, timeout=10)
+        print("USAGE DEBUG:", response.status_code, response.text)  # Debug info for logs
         if response.status_code == 200:
             data = response.json().get("data", {})
             used = data.get("usage", 0)
