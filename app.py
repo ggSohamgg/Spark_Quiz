@@ -14,6 +14,16 @@ def generate_quiz(parameters):
     Build the prompt from user parameters, send to OpenRouter API,
     and parse the response into a list of questions.
     """
+    # Validate that at least one question is requested
+    total_questions = sum(parameters['type_counts'].get(t, 0) for t in parameters['question_types'])
+    if total_questions <= 0:
+        return [{
+            "question": "Error: Please request at least one question.",
+            "options": [],
+            "answer": "",
+            "explanation": "No questions were requested. Please select at least one question type with a quantity greater than 0."
+        }]
+
     prompt = f"Generate a quiz with the following parameters:\n"
     prompt += f"- Topic: {parameters['topic']}\n"
     prompt += f"- Difficulty: {parameters['difficulty']}\n"
@@ -40,6 +50,7 @@ def generate_quiz(parameters):
         "3. If explanations are requested, include them after each question\n"
         "4. Make sure all information is factually correct\n"
     )
+
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json"
@@ -55,15 +66,23 @@ def generate_quiz(parameters):
         response.raise_for_status()
         data = response.json()
         quiz_text = data["choices"][0]["message"]["content"]
+        print(f"Raw API Response: {quiz_text}")  # Debug: Log the raw response
         questions = parse_quiz_text(quiz_text)
+        if not questions:
+            return [{
+                "question": "Error: No questions generated.",
+                "options": [],
+                "answer": "",
+                "explanation": "The API did not return any valid questions. This might be due to rate limits (10 requests/min, 50/day) or an unexpected response format."
+            }]
         return questions
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         print(f"Error from OpenRouter API: {e}")
         return [{
-            "question": "Sorry, the quiz could not be generated at this time.",
+            "question": "Error: Failed to generate quiz.",
             "options": [],
             "answer": "",
-            "explanation": str(e)
+            "explanation": f"API request failed: {str(e)}. This might be due to rate limits (10 requests/min, 50/day) or an invalid API key."
         }]
 
 def parse_quiz_text(quiz_text):
@@ -71,26 +90,68 @@ def parse_quiz_text(quiz_text):
     Parse the quiz text returned by the LLM into a list of question dictionaries.
     Each question may have options, an answer, and an explanation.
     """
+    if not quiz_text or not quiz_text.strip():
+        return []  # Return empty list if quiz_text is empty
+
     questions = []
+    # Split the text into question blocks using regex for numbered questions
     q_blocks = re.split(r"\n?\s*\d+\.\s*", quiz_text)
+    # Remove empty blocks and clean up
+    q_blocks = [block.strip() for block in q_blocks if block.strip()]
+    
     for block in q_blocks:
-        if not block.strip():
-            continue
-        lines = block.strip().split("\n")
+        lines = block.split("\n")
         q = {"question": "", "options": [], "answer": "", "explanation": ""}
+        in_options = False
+        in_explanation = False
+        
         for line in lines:
-            if re.match(r"^[A-D]\.", line.strip()):
-                q["options"].append(line.strip())
-            elif line.lower().startswith("answer:"):
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Detect options (A., B., etc.)
+            if re.match(r"^[A-D]\.\s*", line):
+                q["options"].append(line)
+                in_options = True
+                continue
+                
+            # Detect answer line
+            if line.lower().startswith("answer:"):
                 q["answer"] = line.split(":", 1)[-1].strip()
-            elif line.lower().startswith("explanation:"):
+                in_options = False
+                continue
+                
+            # Detect explanation line
+            if line.lower().startswith("explanation:"):
                 q["explanation"] = line.split(":", 1)[-1].strip()
-            elif not q["question"]:
-                q["question"] = line.strip()
-            else:
-                if q["explanation"]:
-                    q["explanation"] += " " + line.strip()
-        questions.append(q)
+                in_options = False
+                in_explanation = True
+                continue
+                
+            # If we're in explanation, append to it
+            if in_explanation:
+                q["explanation"] += " " + line
+                continue
+                
+            # If we're in options, skip (already handled)
+            if in_options:
+                continue
+                
+            # The first non-option, non-answer, non-explanation line is the question text
+            if not q["question"]:
+                q["question"] = line
+                
+        # Only add the question if it has question text
+        if q["question"]:
+            # Clean up answer (e.g., if it's "A", convert to the full option text)
+            if q["answer"] and q["options"] and len(q["answer"]) == 1 and q["answer"] in "ABCD":
+                for opt in q["options"]:
+                    if opt.startswith(q["answer"] + "."):
+                        q["answer"] = opt
+                        break
+            questions.append(q)
+            
     return questions
 
 @app.route("/")
