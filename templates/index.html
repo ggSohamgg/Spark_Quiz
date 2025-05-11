@@ -10,9 +10,7 @@
 <body>
     <div class="container">
         <h1>🎓 AI Quiz Generator</h1>
-        <div class="info-box">
-            Generate educational quizzes on any topic! Powered by AI.
-        </div>
+        <div id="usage-info" class="info-box"></div>
         <form id="quiz-form">
             <label for="topic">Topic:</label>
             <input type="text" id="topic" name="topic" required placeholder="e.g. World History, Python, Math">
@@ -35,6 +33,20 @@
         <p>Made with ❤️ for education</p>
     </footer>
     <script>
+    // Show usage info
+    async function fetchUsage() {
+        const resp = await fetch('/usage');
+        const data = await resp.json();
+        if (data.error) {
+            document.getElementById('usage-info').innerText = "Usage info unavailable";
+        } else {
+            document.getElementById('usage-info').innerText =
+                `OpenRouter API requests left today: ${data.remaining} of ${data.limit}`;
+        }
+    }
+    fetchUsage();
+
+    // Handle quiz form submission
     document.getElementById('quiz-form').onsubmit = async function(e) {
         e.preventDefault();
         const form = e.target;
@@ -51,20 +63,29 @@
         });
         const result = await response.json();
         let html = "<h2>Your Quiz</h2>";
-        result.quiz.forEach((q, i) => {
-            html += `<div class='question-card'><b>${i+1}. ${q.question}</b><br>`;
-            if (q.options) {
-                html += "<ul>";
-                q.options.forEach(opt => {
-                    html += `<li>${opt}</li>`;
-                });
-                html += "</ul>";
-            }
-            html += `<div class='answer'><b>Answer:</b> ${q.answer}</div>`;
-            html += `<div class='explanation'><i>${q.explanation}</i></div>`;
-            html += "</div>";
-        });
+        if (result.quiz && result.quiz.length > 0) {
+            result.quiz.forEach((q, i) => {
+                html += `<div class='question-card'><b>${i+1}. ${q.question}</b><br>`;
+                if (q.options && q.options.length > 0) {
+                    html += "<ul>";
+                    q.options.forEach(opt => {
+                        html += `<li>${opt}</li>`;
+                    });
+                    html += "</ul>";
+                }
+                if (q.answer) {
+                    html += `<div class='answer'><b>Answer:</b> ${q.answer}</div>`;
+                }
+                if (q.explanation) {
+                    html += `<div class='explanation'><i>${q.explanation}</i></div>`;
+                }
+                html += "</div>";
+            });
+        } else {
+            html += "<div class='error'>Sorry, no quiz could be generated.</div>";
+        }
         document.getElementById('quiz-output').innerHTML = html;
+        fetchUsage(); // update usage info after quiz generation
     }
     </script>
 </body>
