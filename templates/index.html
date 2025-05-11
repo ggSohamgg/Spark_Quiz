@@ -1,281 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>SparkQuiz - AI Quiz Generator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SparkQuiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Main font and heading/button font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>SparkQuiz - AI Quiz Generator</h1>
-        <div id="usage-info" class="info-box"></div>
-        <form id="quiz-form" autocomplete="off">
-            <div class="main-fields">
-                <div class="row">
-                    <div class="input-group">
-                        <label for="topic">Topic</label>
-                        <input type="text" id="topic" name="topic" required placeholder="e.g., Quantum Physics">
-                    </div>
-                    <div class="input-group">
-                        <label for="num_questions">Number of Questions</label>
-                        <input type="number" id="num_questions" name="num_questions" min="1" max="10" value="3">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="input-group">
-                        <label for="difficulty">Difficulty</label>
-                        <select id="difficulty" name="difficulty">
-                            <option value="easy" selected>Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
-                        </select>
-                    </div>
-                    <div class="input-group question-types-container">
-                        <label>Desired Question Types</label>
-                        <div class="question-types-row">
-                            <div class="question-type-group" id="question-type-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="question_types" value="multiple choice" checked>
-                                    Multiple Choice
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="question_types" value="single choice">
-                                    Single Choice
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="question_types" value="true/false">
-                                    True/False
-                                </label>
-                            </div>
-                            <div id="question-quantities" class="question-quantities" style="display: none;">
-                                <label>Number of Questions per Type</label>
-                                <div id="quantities-container" class="quantities-container"></div>
-                                <div id="quantity-error" class="error" style="display: none;"></div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="question_types_hidden" id="question_types_input">
-                    </div>
-                </div>
-            </div>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1 class="spark-heading">
+        <span class="spark-gradient">SparkQuiz</span>
+        <span class="spark-underline"></span>
+      </h1>
+    </header>
 
-            <details class="advanced-options">
-                <summary>Advanced Settings</summary>
-                <div class="advanced-content">
-                    <div class="row">
-                        <div class="input-group">
-                            <label for="subtopics">Sub-topics (comma-separated)</label>
-                            <input type="text" id="subtopics" name="subtopics" placeholder="e.g., Wave-particle duality, Quantum entanglement">
-                        </div>
-                        <div class="input-group">
-                            <label for="keywords">Context Keywords (comma-separated)</label>
-                            <input type="text" id="keywords" name="keywords" placeholder="e.g., experiment, theory, equation">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="input-group">
-                            <label for="audience">Target Audience</label>
-                            <input type="text" id="audience" name="audience" placeholder="e.g., High School Students">
-                        </div>
-                        <div class="input-group">
-                            <label for="language">Language</label>
-                            <input type="text" id="language" name="language" placeholder="e.g., en (default English)">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="input-group">
-                            <label for="include_explanations">Include Explanations?</label>
-                            <select id="include_explanations" name="include_explanations">
-                                <option value="yes" selected>Yes</option>
-                                <option value="no">No</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label for="max_length">Max Length per Question (words)</label>
-                            <input type="number" id="max_length" name="max_length" min="0" placeholder="e.g., 30">
-                        </div>
-                    </div>
-                </div>
-            </details>
+    <!-- Info Box -->
+    <section class="info-box" aria-live="polite">
+      Instantly generate custom quizzes for any subject. Select your preferences below!
+    </section>
 
-            <button type="submit" class="main-btn">Generate Quiz</button>
-        </form>
-        <div id="quiz-output"></div>
-    </div>
-    <footer>
-        <div class="about-box">
-            <h3>About SparkQuiz</h3>
-            <p>
-                Powered by <b>Qwen-2.5-72B-Instruct</b> via OpenRouter.ai, SparkQuiz creates tailored quizzes for learning. 
-                Customize your quiz with ease and explore any topic.<br>
-                <i>For educational use. Spark your curiosity!</i>
-            </p>
+    <!-- Main Form Fields -->
+    <form class="main-fields" id="quiz-form" autocomplete="off">
+      <!-- Row 1: Topic & Difficulty -->
+      <div class="row">
+        <div class="input-group">
+          <label for="topic">Topic <span class="field-desc">(e.g., "Quantum Physics")</span></label>
+          <input type="text" id="topic" name="topic" placeholder="e.g. Quantum Physics" required />
         </div>
-        <p>Made with care for learning. © 2025</p>
+        <div class="input-group">
+          <label for="difficulty">Difficulty <span class="field-desc">(easy, medium, hard)</span></label>
+          <select id="difficulty" name="difficulty" required>
+            <option value="">Select</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 2: Number & Question Types -->
+      <div class="row">
+        <div class="input-group">
+          <label for="quantity">Number of Questions <span class="field-desc">(e.g., 3)</span></label>
+          <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            min="1"
+            max="50"
+            value="3"
+            class="quantity-field"
+            required
+          />
+          <div id="quantity-error" aria-live="polite"></div>
+        </div>
+        <div class="question-types-container">
+          <span style="font-weight:500; margin-bottom:8px;">Desired Question Types <span class="field-desc">(select one or more)</span></span>
+          <div class="question-types-row">
+            <div class="question-type-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="type-mcq" checked />
+                Multiple Choice
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="type-short" />
+                Short Answer
+              </label>
+            </div>
+            <div class="question-type-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="type-truefalse" />
+                True / False
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="type-fillblank" />
+                Fill in the Blank
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Options -->
+      <details class="advanced-options">
+        <summary>Advanced Options</summary>
+        <div class="advanced-content">
+          <div class="row">
+            <div class="input-group">
+              <label for="subtopics">Specific Sub-topics <span class="field-desc">(Optional, comma separated)</span></label>
+              <input type="text" id="subtopics" name="subtopics" placeholder='e.g. Wave-particle duality, Quantum entanglement' />
+            </div>
+            <div class="input-group">
+              <label for="context">Context Keywords <span class="field-desc">(Optional, comma separated)</span></label>
+              <input type="text" id="context" name="context" placeholder='e.g. experiment, theory, equation' />
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-group">
+              <label for="audience">Target Audience <span class="field-desc">(Optional)</span></label>
+              <input type="text" id="audience" name="audience" placeholder='e.g. Undergraduate Physics Students' />
+            </div>
+            <div class="input-group">
+              <label for="language">Language <span class="field-desc">(Optional, default: English)</span></label>
+              <input type="text" id="language" name="language" placeholder='e.g. en, es, fr' />
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-group">
+              <label for="max-length">Maximum Length per Question <span class="field-desc">(Optional, in words)</span></label>
+              <input type="number" id="max-length" name="max-length" min="1" placeholder="e.g. 30" />
+            </div>
+            <div class="input-group">
+              <label>Include Explanations?</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="include-explanations" value="yes" checked />
+                  Yes
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="include-explanations" value="no" />
+                  No
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Generate Button -->
+      <div class="btn-center">
+        <button type="submit" class="main-btn">Generate Quiz</button>
+      </div>
+    </form>
+
+    <!-- Quiz Output -->
+    <section id="quiz-output" aria-live="polite">
+      <!-- Quiz questions will be dynamically inserted here -->
+    </section>
+
+    <!-- Loading & Error Messages -->
+    <div class="loading" style="display:none;">Generating your quiz...</div>
+    <div class="error" style="display:none;"></div>
+
+    <!-- About Box -->
+    <section class="about-box">
+      SparkQuiz leverages <b>Qwen2.5-72B-Instruct</b>, a state-of-the-art large language model by Alibaba Cloud, to create custom quizzes effortlessly for any subject, audience, or language.
+      <br>
+      <a class="about-link" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct" target="_blank" rel="noopener">Check the model card: Qwen2.5-72B-Instruct</a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      &copy; 2025 SparkQuiz &mdash; Crafted with <span aria-label="love">❤️</span> for learning.
     </footer>
-    <script>
-        // Question type checkbox handling and dynamic quantities
-        const qtGroup = document.getElementById('question-type-group');
-        const qtInput = document.getElementById('question_types_input');
-        const quantitiesSection = document.getElementById('question-quantities');
-        const quantitiesContainer = document.getElementById('quantities-container');
-        const quantityError = document.getElementById('quantity-error');
-        const numQuestionsInput = document.getElementById('num_questions');
-
-        function updateQuantitiesSection() {
-            const selected = Array.from(qtGroup.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
-            qtInput.value = selected.join(',');
-
-            // Show or hide the quantities section
-            if (selected.length > 0) {
-                quantitiesSection.style.display = 'block';
-            } else {
-                quantitiesSection.style.display = 'none';
-            }
-
-            // Clear previous inputs
-            quantitiesContainer.innerHTML = '';
-
-            // Add input fields for each selected question type
-            selected.forEach(type => {
-                const div = document.createElement('div');
-                div.className = 'quantity-input';
-                const label = document.createElement('label');
-                label.textContent = `Number of ${type.replace(/^\w/, c => c.toUpperCase())} Questions`;
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.name = `quantity_${type}`;
-                input.min = '0';
-                input.value = '0';
-                input.className = 'quantity-field';
-                div.appendChild(label);
-                div.appendChild(input);
-                quantitiesContainer.appendChild(div);
-            });
-
-            // Validate total questions on input change
-            quantitiesContainer.addEventListener('input', validateQuantities);
-        }
-
-        function validateQuantities() {
-            const totalQuestions = parseInt(numQuestionsInput.value) || 0;
-            const quantityInputs = quantitiesContainer.querySelectorAll('input.quantity-field');
-            let totalAssigned = 0;
-
-            quantityInputs.forEach(input => {
-                totalAssigned += parseInt(input.value) || 0;
-            });
-
-            if (totalAssigned !== totalQuestions) {
-                quantityError.style.display = 'block';
-                quantityError.textContent = `Total questions assigned (${totalAssigned}) must equal the number of questions (${totalQuestions}).`;
-            } else {
-                quantityError.style.display = 'none';
-            }
-        }
-
-        // Initial call and event listener
-        updateQuantitiesSection();
-        qtGroup.addEventListener('change', updateQuantitiesSection);
-
-        // Update quantities when total number of questions changes
-        numQuestionsInput.addEventListener('input', validateQuantities);
-
-        // Usage info
-        async function fetchUsage() {
-            const resp = await fetch('/usage');
-            const data = await resp.json();
-            const infoBox = document.getElementById('usage-info');
-            if (data.error) {
-                infoBox.innerText = "Usage info unavailable";
-            } else if (data.limit !== null && data.remaining !== null) {
-                infoBox.innerText = `OpenRouter API requests left today: ${data.remaining} of ${data.limit}`;
-            } else if (data.per_min && data.interval) {
-                infoBox.innerText = `OpenRouter Free Tier: Up to ${data.per_min} requests per ${data.interval}.`;
-            } else {
-                infoBox.innerText = "Usage info unavailable";
-            }
-        }
-        fetchUsage();
-
-        // Form submission
-        document.getElementById('quiz-form').onsubmit = async function(e) {
-            e.preventDefault();
-
-            // Validate quantities before submission
-            const totalQuestions = parseInt(numQuestionsInput.value) || 0;
-            const quantityInputs = quantitiesContainer.querySelectorAll('input.quantity-field');
-            let totalAssigned = 0;
-
-            quantityInputs.forEach(input => {
-                totalAssigned += parseInt(input.value) || 0;
-            });
-
-            if (totalAssigned !== totalQuestions) {
-                alert(`Total questions assigned (${totalAssigned}) must equal the number of questions (${totalQuestions}).`);
-                return;
-            }
-
-            const form = e.target;
-            const formData = new FormData(form);
-            const question_types = formData.get('question_types_hidden') ? formData.get('question_types_hidden').split(',').filter(Boolean) : [];
-            const subtopics = formData.get('subtopics') ? formData.get('subtopics').split(',').map(s => s.trim()).filter(Boolean) : [];
-            const keywords = formData.get('keywords') ? formData.get('keywords').split(',').map(s => s.trim()).filter(Boolean) : [];
-
-            // Add quantities to parameters
-            const question_type_quantities = {};
-            question_types.forEach(type => {
-                const quantity = formData.get(`quantity_${type}`);
-                question_type_quantities[type] = parseInt(quantity) || 0;
-            });
-
-            const parameters = {
-                topic: formData.get('topic'),
-                difficulty: formData.get('difficulty'),
-                num_questions: formData.get('num_questions'),
-                question_types: question_types,
-                question_type_quantities: question_type_quantities,
-                subtopics: subtopics,
-                keywords: keywords,
-                audience: formData.get('audience'),
-                language: formData.get('language') || "en",
-                include_explanations: formData.get('include_explanations') === "yes",
-                max_length: formData.get('max_length')
-            };
-
-            document.getElementById('quiz-output').innerHTML = "<div class='loading'>Generating your quiz...</div>";
-            const response = await fetch('/generate_quiz', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(parameters)
-            });
-            const result = await response.json();
-            let html = "<h2>Your SparkQuiz</h2>";
-            if (result.quiz && result.quiz.length > 0) {
-                result.quiz.forEach((q, i) => {
-                    html += `<div class='question-card'><b>${i+1}. ${q.question}</b><br>`;
-                    if (q.options && q.options.length > 0) {
-                        html += "<ul>";
-                        q.options.forEach(opt => {
-                            html += `<li>${opt}</li>`;
-                        });
-                        html += "</ul>";
-                    }
-                    if (q.answer) {
-                        html += `<div class='answer'><b>Answer:</b> ${q.answer}</div>`;
-                    }
-                    if (q.explanation) {
-                        html += `<div class='explanation'><i>${q.explanation}</i></div>`;
-                    }
-                    html += "</div>";
-                });
-            } else {
-                html += "<div class='error'>Unable to generate a quiz at this time.</div>";
-            }
-            document.getElementById('quiz-output').innerHTML = html;
-            fetchUsage();
-        };
-    </script>
+  </div>
 </body>
 </html>
