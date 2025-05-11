@@ -118,4 +118,149 @@
     <section class="about-box">
       <div class="about-title">About SparkQuiz</div>
       <div>
-        <strong>SparkQuiz</strong> is your AI
+        <strong>SparkQuiz</strong> is your AI-powered quiz generator for any subject, audience, or language.<br><br>
+        Powered by <b>Qwen2.5-72B-Instruct</b> via free OpenRouter (10 requests/min, 50/day).<br>
+        If not working, please wait until the next day.<br><br>
+        SparkQuiz crafts high-quality, fact-checked quizzes tailored to your needs.<br>
+        Choose question types, difficulty, sub-topics, and more.<br>
+        Explanations are included for deeper learning and understanding.<br><br>
+        <a class="about-link" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct" target="_blank" rel="noopener">
+          Check the model card: Qwen2.5-72B-Instruct
+        </a>
+      </div>
+    </section>
+    <footer>
+      © 2025 SparkQuiz — Crafted with <span aria-label="love">❤️</span> for learning.
+    </footer>
+  </div>
+  <script>
+    // Show/hide quantity boxes for each question type
+    function toggleQuantityBox(checkboxId, boxId) {
+      const checkbox = document.getElementById(checkboxId);
+      const box = document.getElementById(boxId);
+      checkbox.addEventListener('change', function() {
+        box.style.display = this.checked ? 'block' : 'none';
+      });
+    }
+
+    // Initialize quantity box visibility on page load
+    toggleQuantityBox('type-mcq', 'mcq-quantity-box');
+    toggleQuantityBox('type-short', 'short-quantity-box');
+    toggleQuantityBox('type-truefalse', 'truefalse-quantity-box');
+
+    window.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('mcq-quantity-box').style.display = document.getElementById('type-mcq').checked ? 'block' : 'none';
+      document.getElementById('short-quantity-box').style.display = document.getElementById('type-short').checked ? 'block' : 'none';
+      document.getElementById('truefalse-quantity-box').style.display = document.getElementById('type-truefalse').checked ? 'block' : 'none';
+    });
+
+    // FORM SUBMISSION: Validate and send data to Flask
+    const quizForm = document.getElementById('quiz-form');
+    quizForm.addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent default form submission to stop page reload
+
+      // Get values for question types and quantities
+      let mcqVal = document.getElementById('type-mcq').checked ? parseInt(document.getElementById('mcq-quantity').value || "0") : 0;
+      let shortVal = document.getElementById('type-short').checked ? parseInt(document.getElementById('short-quantity').value || "0") : 0;
+      let tfVal = document.getElementById('type-truefalse').checked ? parseInt(document.getElementById('truefalse-quantity').value || "0") : 0;
+
+      // Validation: no more than 15 for any type
+      if (mcqVal > 15 || shortVal > 15 || tfVal > 15) {
+        alert("Maximum allowed per category is 15.");
+        return; // Stop submission if validation fails
+      }
+
+      // Validate that at least one question is requested
+      const totalQuestions = mcqVal + shortVal + tfVal;
+      if (totalQuestions <= 0) {
+        document.querySelector('.loading').style.display = 'none';
+        document.querySelector('.error').style.display = 'block';
+        document.querySelector('.error').textContent = "Error: Please request at least one question.";
+        return;
+      }
+
+      // Gather form data
+      const topic = document.getElementById('topic').value;
+      const difficulty = document.getElementById('difficulty').value;
+      const subtopics = document.getElementById('subtopics').value.split(',').map(s => s.trim()).filter(Boolean);
+      const keywords = document.getElementById('context').value.split(',').map(s => s.trim()).filter(Boolean);
+      const audience = document.getElementById('audience').value;
+      const language = document.getElementById('language').value || "en";
+      const max_length = document.getElementById('max-length').value;
+      const include_explanations = document.querySelector('input[name="include-explanations"]:checked').value === "yes";
+
+      const question_types = [];
+      const type_counts = {};
+      if (document.getElementById('type-mcq').checked) {
+        question_types.push("Multiple Choice");
+        type_counts["Multiple Choice"] = mcqVal;
+      }
+      if (document.getElementById('type-short').checked) {
+        question_types.push("Short Answer");
+        type_counts["Short Answer"] = shortVal;
+      }
+      if (document.getElementById('type-truefalse').checked) {
+        question_types.push("True/False");
+        type_counts["True/False"] = tfVal;
+      }
+
+      const parameters = {
+        topic,
+        difficulty,
+        subtopics,
+        keywords,
+        audience,
+        language,
+        max_length,
+        include_explanations,
+        question_types,
+        type_counts
+      };
+
+      // Show loading state
+      document.querySelector('.loading').style.display = 'block';
+      document.querySelector('.error').style.display = 'none';
+      document.getElementById('quiz-output').value = '';
+
+      // Send request to backend
+      fetch('/generate_quiz', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(parameters)
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.querySelector('.loading').style.display = 'none';
+        if (data.quiz && data.quiz.length) {
+          // Format the quiz output as a continuous text string for the textarea
+          let quizText = "Your Quiz\n\n";
+          data.quiz.forEach((q, i) => {
+            quizText += `Question ${i + 1}\n${q.question}\n`;
+            if (q.options && q.options.length) {
+              quizText += "Options:\n";
+              q.options.forEach(opt => {
+                quizText += `  ${opt}\n`;
+              });
+            }
+            if (q.answer) {
+              quizText += `Answer: ${q.answer}\n`;
+            }
+            if (q.explanation) {
+              quizText += `Explanation: ${q.explanation}\n`;
+            }
+            quizText += "\n------------------------\n\n";
+          });
+          document.getElementById('quiz-output').value = quizText;
+        } else {
+          document.getElementById('quiz-output').value = 'Error: No quiz generated.';
+        }
+      })
+      .catch(err => {
+        document.querySelector('.loading').style.display = 'none';
+        document.querySelector('.error').style.display = 'block';
+        document.querySelector('.error').textContent = "An error occurred: " + err.message;
+      });
+    });
+  </script>
+</body>
+</html>
