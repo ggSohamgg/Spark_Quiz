@@ -32,21 +32,28 @@
                             <option value="hard">Hard</option>
                         </select>
                     </div>
-                    <div class="input-group">
+                    <div class="input-group question-types-container">
                         <label>Desired Question Types</label>
-                        <div class="question-type-group" id="question-type-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="question_types" value="multiple choice" checked>
-                                Multiple Choice
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="question_types" value="single choice">
-                                Single Choice
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="question_types" value="yes or no">
-                                Yes or No
-                            </label>
+                        <div class="question-types-row">
+                            <div class="question-type-group" id="question-type-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="question_types" value="multiple choice" checked>
+                                    Multiple Choice
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="question_types" value="single choice">
+                                    Single Choice
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="question_types" value="true/false">
+                                    True/False
+                                </label>
+                            </div>
+                            <div id="question-quantities" class="question-quantities" style="display: none;">
+                                <label>Number of Questions per Type</label>
+                                <div id="quantities-container" class="quantities-container"></div>
+                                <div id="quantity-error" class="error" style="display: none;"></div>
+                            </div>
                         </div>
                         <input type="hidden" name="question_types_hidden" id="question_types_input">
                     </div>
@@ -108,13 +115,72 @@
         <p>Made with care for learning. © 2025</p>
     </footer>
     <script>
-        // Question type checkbox handling
+        // Question type checkbox handling and dynamic quantities
         const qtGroup = document.getElementById('question-type-group');
         const qtInput = document.getElementById('question_types_input');
-        qtGroup.addEventListener('change', function() {
+        const quantitiesSection = document.getElementById('question-quantities');
+        const quantitiesContainer = document.getElementById('quantities-container');
+        const quantityError = document.getElementById('quantity-error');
+        const numQuestionsInput = document.getElementById('num_questions');
+
+        function updateQuantitiesSection() {
             const selected = Array.from(qtGroup.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
             qtInput.value = selected.join(',');
-        });
+
+            // Show or hide the quantities section
+            if (selected.length > 0) {
+                quantitiesSection.style.display = 'block';
+            } else {
+                quantitiesSection.style.display = 'none';
+            }
+
+            // Clear previous inputs
+            quantitiesContainer.innerHTML = '';
+
+            // Add input fields for each selected question type
+            selected.forEach(type => {
+                const div = document.createElement('div');
+                div.className = 'quantity-input';
+                const label = document.createElement('label');
+                label.textContent = `Number of ${type.replace(/^\w/, c => c.toUpperCase())} Questions`;
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.name = `quantity_${type}`;
+                input.min = '0';
+                input.value = '0';
+                input.className = 'quantity-field';
+                div.appendChild(label);
+                div.appendChild(input);
+                quantitiesContainer.appendChild(div);
+            });
+
+            // Validate total questions on input change
+            quantitiesContainer.addEventListener('input', validateQuantities);
+        }
+
+        function validateQuantities() {
+            const totalQuestions = parseInt(numQuestionsInput.value) || 0;
+            const quantityInputs = quantitiesContainer.querySelectorAll('input.quantity-field');
+            let totalAssigned = 0;
+
+            quantityInputs.forEach(input => {
+                totalAssigned += parseInt(input.value) || 0;
+            });
+
+            if (totalAssigned !== totalQuestions) {
+                quantityError.style.display = 'block';
+                quantityError.textContent = `Total questions assigned (${totalAssigned}) must equal the number of questions (${totalQuestions}).`;
+            } else {
+                quantityError.style.display = 'none';
+            }
+        }
+
+        // Initial call and event listener
+        updateQuantitiesSection();
+        qtGroup.addEventListener('change', updateQuantitiesSection);
+
+        // Update quantities when total number of questions changes
+        numQuestionsInput.addEventListener('input', validateQuantities);
 
         // Usage info
         async function fetchUsage() {
@@ -136,16 +202,40 @@
         // Form submission
         document.getElementById('quiz-form').onsubmit = async function(e) {
             e.preventDefault();
+
+            // Validate quantities before submission
+            const totalQuestions = parseInt(numQuestionsInput.value) || 0;
+            const quantityInputs = quantitiesContainer.querySelectorAll('input.quantity-field');
+            let totalAssigned = 0;
+
+            quantityInputs.forEach(input => {
+                totalAssigned += parseInt(input.value) || 0;
+            });
+
+            if (totalAssigned !== totalQuestions) {
+                alert(`Total questions assigned (${totalAssigned}) must equal the number of questions (${totalQuestions}).`);
+                return;
+            }
+
             const form = e.target;
             const formData = new FormData(form);
             const question_types = formData.get('question_types_hidden') ? formData.get('question_types_hidden').split(',').filter(Boolean) : [];
             const subtopics = formData.get('subtopics') ? formData.get('subtopics').split(',').map(s => s.trim()).filter(Boolean) : [];
             const keywords = formData.get('keywords') ? formData.get('keywords').split(',').map(s => s.trim()).filter(Boolean) : [];
+
+            // Add quantities to parameters
+            const question_type_quantities = {};
+            question_types.forEach(type => {
+                const quantity = formData.get(`quantity_${type}`);
+                question_type_quantities[type] = parseInt(quantity) || 0;
+            });
+
             const parameters = {
                 topic: formData.get('topic'),
                 difficulty: formData.get('difficulty'),
                 num_questions: formData.get('num_questions'),
                 question_types: question_types,
+                question_type_quantities: question_type_quantities,
                 subtopics: subtopics,
                 keywords: keywords,
                 audience: formData.get('audience'),
@@ -153,6 +243,7 @@
                 include_explanations: formData.get('include_explanations') === "yes",
                 max_length: formData.get('max_length')
             };
+
             document.getElementById('quiz-output').innerHTML = "<div class='loading'>Generating your quiz...</div>";
             const response = await fetch('/generate_quiz', {
                 method: 'POST',
