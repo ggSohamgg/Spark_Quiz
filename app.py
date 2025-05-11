@@ -5,7 +5,7 @@ import requests
 app = Flask(__name__)
 
 HF_API_TOKEN = os.environ.get("HF_API_TOKEN")
-HF_API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct"
+HF_API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-3B-Instruct"
 
 def generate_quiz(topic, difficulty, num_questions):
     prompt = (
