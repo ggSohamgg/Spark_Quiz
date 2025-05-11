@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import os
 import requests
 import re
+import json
 
 app = Flask(__name__)
 
@@ -76,8 +77,35 @@ def generate_quiz(parameters):
     }
     try:
         response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=180)
+        
+        # Check for HTTP errors first
         response.raise_for_status()
-        data = response.json()
+        
+        # Try to parse as JSON - handle non-JSON responses
+        try:
+            data = response.json()
+        except json.JSONDecodeError as json_err:
+            print(f"JSON decode error: {json_err}")
+            print(f"Response content: {response.text[:500]}...")  # Log the first 500 chars of response
+            return [{
+                "question": "Error: Invalid response from API.",
+                "options": [],
+                "answer": "",
+                "explanation": "The API returned an invalid response format. This might be due to rate limits, service issues, or invalid credentials.",
+                "type": ""
+            }]
+        
+        # Check if we got the expected JSON structure
+        if "choices" not in data or not data["choices"] or "message" not in data["choices"][0]:
+            print(f"Unexpected API response structure: {data}")
+            return [{
+                "question": "Error: Unexpected API response format.",
+                "options": [],
+                "answer": "",
+                "explanation": "The API response did not contain the expected data structure.",
+                "type": ""
+            }]
+        
         quiz_text = data["choices"][0]["message"]["content"]
         print(f"Raw API Response: {quiz_text}")  # Debug: Log the raw response
         questions = parse_quiz_text(quiz_text)
