@@ -4,109 +4,310 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SparkQuiz</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <!-- Add marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
+  <style>
+    /* Style the quiz output div to match the previous textarea design */
+    #quiz-output {
+      width: 100%;
+      min-height: 320px;
+      background: #23213A;
+      color: #fff;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      border: 1.5px solid #3E3968;
+      padding: 20px;
+      margin-top: 24px;
+      overflow-y: auto;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    /* Ensure bold text from Markdown rendering looks good */
+    #quiz-output strong {
+      font-weight: 700;
+    }
+    /* Style horizontal rules (for the separators) */
+    #quiz-output hr {
+      border: 0;
+      border-top: 1px solid #3E3968;
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="spark-heading">SparkQuiz</h1>
-
-    <form id="quiz-form">
-      <div class="main-fields">
+    <header>
+      <h1 class="spark-heading">
+        <span class="spark-gradient">SparkQuiz</span>
+        <span class="spark-underline"></span>
+      </h1>
+    </header>
+    <section class="info-box" aria-live="polite">
+      Instantly generate custom quizzes for any subject. Select your preferences below!
+    </section>
+    <form class="main-fields" id="quiz-form" autocomplete="off">
+      <div class="row">
         <div class="input-group">
-          <label for="topic">Topic</label>
-          <input type="text" id="topic" placeholder="e.g., Quantum Physics" />
+          <label for="topic">Topic <span class="field-desc">(e.g., "Quantum Physics")</span></label>
+          <input type="text" id="topic" name="topic" placeholder="e.g. Quantum Physics" required />
         </div>
         <div class="input-group">
-          <label for="difficulty">Difficulty</label>
-          <select id="difficulty">
+          <label for="difficulty">Difficulty <span class="field-desc">(easy, medium, hard)</span></label>
+          <select id="difficulty" name="difficulty" required>
+            <option value="">Select</option>
             <option value="easy">Easy</option>
-            <option value="medium" selected>Medium</option>
+            <option value="medium">Medium</option>
             <option value="hard">Hard</option>
           </select>
         </div>
+      </div>
+      <div class="row">
         <div class="question-types-container">
-          <div class="question-type-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="mcq-check" value="Multiple Choice" checked />
-              Multiple Choice
-            </label>
-            <input type="number" id="mcq-count" class="quantity-input-custom" min="0" value="3" />
+          <span style="font-weight:500; margin-bottom:8px;">Desired Question Types <span class="field-desc">(select one or more)</span></span>
+          <div class="question-types-row">
+            <div class="question-type-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="type-mcq" id="type-mcq" checked />
+                Multiple Choice
+              </label>
+              <div class="type-quantity" id="mcq-quantity-box">
+                <label for="mcq-quantity" class="quantity-label">How many Multiple Choice?</label>
+                <input type="number" id="mcq-quantity" name="mcq-quantity" min="1" max="15" value="1" class="quantity-input-custom" />
+              </div>
+              <label class="checkbox-label">
+                <input type="checkbox" name="type-short" id="type-short" />
+                Short Answer
+              </label>
+              <div class="type-quantity" id="short-quantity-box" style="display:none;">
+                <label for="short-quantity" class="quantity-label">How many Short Answer?</label>
+                <input type="number" id="short-quantity" name="short-quantity" min="1" max="15" value="1" class="quantity-input-custom" />
+              </div>
+              <label class="checkbox-label">
+                <input type="checkbox" name="type-truefalse" id="type-truefalse" />
+                True / False
+              </label>
+              <div class="type-quantity" id="truefalse-quantity-box" style="display:none;">
+                <label for="truefalse-quantity" class="quantity-label">How many True/False?</label>
+                <input type="number" id="truefalse-quantity" name="truefalse-quantity" min="1" max="15" value="1" class="quantity-input-custom" />
+              </div>
+            </div>
           </div>
-          <div class="question-type-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="sa-check" value="Short Answer" checked />
-              Short Answer
-            </label>
-            <input type="number" id="sa-count" class="quantity-input-custom" min="0" value="0" />
-          </div>
-          <div class="question-type-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="tf-check" value="True/False" checked />
-              True / False
-            </label>
-            <input type="number" id="tf-count" class="quantity-input-custom" min="0" value="0" />
-          </div>
-        </div>
-
-        <div class="btn-center">
-          <button type="submit" class="main-btn">Generate Quiz</button>
         </div>
       </div>
+      <details class="advanced-options">
+        <summary>Advanced Options</summary>
+        <div class="advanced-content">
+          <div class="input-group">
+            <label for="subtopics">Specific Sub-topics <span class="field-desc">(Optional, comma separated)</span></label>
+            <input type="text" id="subtopics" name="subtopics" placeholder='e.g. Wave-particle duality, Quantum entanglement' />
+          </div>
+          <div class="input-group">
+            <label for="context">Context Keywords <span class="field-desc">(Optional, comma separated)</span></label>
+            <input type="text" id="context" name="context" placeholder='e.g. experiment, theory, equation' />
+          </div>
+          <div class="input-group">
+            <label for="audience">Target Audience <span class="field-desc">(Optional)</span></label>
+            <input type="text" id="audience" name="audience" placeholder='e.g. Undergraduate Physics Students' />
+          </div>
+          <div class="input-group">
+            <label for="language">Language <span class="field-desc">(Optional, default: English)</span></label>
+            <input type="text" id="language" name="language" placeholder='e.g. en, es, fr' />
+          </div>
+          <div class="input-group">
+            <label for="max-length">Maximum Length per Question <span class="field-desc">(Optional, in words)</span></label>
+            <input type="number" id="max-length" name="max-length" min="1" placeholder="e.g. 30" class="quantity-input-custom" />
+          </div>
+          <div class="input-group">
+            <label>Include Explanations?</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="include-explanations" value="yes" checked />
+                Yes
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="include-explanations" value="no" />
+                No
+              </label>
+            </div>
+          </div>
+        </div>
+      </details>
+      <div class="btn-center">
+        <button type="submit" class="main-btn">Generate Quiz</button>
+      </div>
     </form>
-
-    <!-- Using <pre> to preserve formatting of raw output -->
-    <pre id="quiz-output"></pre>
-
+    <!-- Output as a div with rendered Markdown -->
+    <div id="quiz-output" aria-live="polite"></div>
+    <div class="loading" style="display:none;">Generating your quiz...</div>
+    <div class="error" style="display:none;"></div>
+    <section class="about-box">
+      <div class="about-title">About SparkQuiz</div>
+      <div>
+        <strong>SparkQuiz</strong> is your AI-powered quiz generator for any subject, audience, or language.<br><br>
+        Powered by <b>Qwen2.5-72B-Instruct</b> via free OpenRouter (10 requests/min, 50/day).<br>
+        If not working, please wait until the next day.<br><br>
+        SparkQuiz crafts high-quality, fact-checked quizzes tailored to your needs.<br>
+        Choose question types, difficulty, sub-topics, and more.<br>
+        Explanations are included for deeper learning and understanding.<br><br>
+        <a class="about-link" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct" target="_blank" rel="noopener">
+          Check the model card: Qwen2.5-72B-Instruct
+        </a>
+      </div>
+    </section>
     <footer>
-      <p>Powered by Qwen2.5-72B-Instruct via OpenRouter</p>
+      © 2025 SparkQuiz — Crafted with <span aria-label="love">❤️</span> for learning.
     </footer>
   </div>
-
   <script>
-    document.getElementById('quiz-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Show/hide quantity boxes for each question type
+    function toggleQuantityBox(checkboxId, boxId) {
+      const checkbox = document.getElementById(checkboxId);
+      const box = document.getElementById(boxId);
+      checkbox.addEventListener('change', function() {
+        box.style.display = this.checked ? 'block' : 'none';
+      });
+    }
 
-      // Gather parameters from the form
+    // Initialize quantity box visibility on page load
+    toggleQuantityBox('type-mcq', 'mcq-quantity-box');
+    toggleQuantityBox('type-short', 'short-quantity-box');
+    toggleQuantityBox('type-truefalse', 'truefalse-quantity-box');
+
+    window.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('mcq-quantity-box').style.display = document.getElementById('type-mcq').checked ? 'block' : 'none';
+      document.getElementById('short-quantity-box').style.display = document.getElementById('type-short').checked ? 'block' : 'none';
+      document.getElementById('truefalse-quantity-box').style.display = document.getElementById('type-truefalse').checked ? 'block' : 'none';
+    });
+
+    // FORM SUBMISSION: Validate and send data to Flask
+    const quizForm = document.getElementById('quiz-form');
+    quizForm.addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent default form submission to stop page reload
+
+      // Get values for question types and quantities
+      let mcqVal = document.getElementById('type-mcq').checked ? parseInt(document.getElementById('mcq-quantity').value || "0") : 0;
+      let shortVal = document.getElementById('type-short').checked ? parseInt(document.getElementById('short-quantity').value || "0") : 0;
+      let tfVal = document.getElementById('type-truefalse').checked ? parseInt(document.getElementById('truefalse-quantity').value || "0") : 0;
+
+      // Validation: no more than 15 for any type
+      if (mcqVal > 15 || shortVal > 15 || tfVal > 15) {
+        alert("Maximum allowed per category is 15.");
+        return; // Stop submission if validation fails
+      }
+
+      // Validate that at least one question is requested
+      const totalQuestions = mcqVal + shortVal + tfVal;
+      if (totalQuestions <= 0) {
+        document.querySelector('.loading').style.display = 'none';
+        document.querySelector('.error').style.display = 'block';
+        document.querySelector('.error').textContent = "Error: Please request at least one question.";
+        return;
+      }
+
+      // Gather form data
+      const topic = document.getElementById('topic').value;
+      const difficulty = document.getElementById('difficulty').value;
+      const subtopics = document.getElementById('subtopics').value.split(',').map(s => s.trim()).filter(Boolean);
+      const keywords = document.getElementById('context').value.split(',').map(s => s.trim()).filter(Boolean);
+      const audience = document.getElementById('audience').value;
+      const language = document.getElementById('language').value || "en";
+      const max_length = document.getElementById('max-length').value;
+      const include_explanations = document.querySelector('input[name="include-explanations"]:checked').value === "yes";
+
+      const question_types = [];
+      const type_counts = {};
+      if (document.getElementById('type-mcq').checked) {
+        question_types.push("Multiple Choice");
+        type_counts["Multiple Choice"] = mcqVal;
+      }
+      if (document.getElementById('type-short').checked) {
+        question_types.push("Short Answer");
+        type_counts["Short Answer"] = shortVal;
+      }
+      if (document.getElementById('type-truefalse').checked) {
+        question_types.push("True/False");
+        type_counts["True/False"] = tfVal;
+      }
+
       const parameters = {
-        topic: document.getElementById('topic').value.trim(),
-        difficulty: document.getElementById('difficulty').value,
-        question_types: [],
-        type_counts: {}
+        topic,
+        difficulty,
+        subtopics,
+        keywords,
+        audience,
+        language,
+        max_length,
+        include_explanations,
+        question_types,
+        type_counts
       };
 
-      // Multiple Choice
-      if (document.getElementById('mcq-check').checked) {
-        parameters.question_types.push('Multiple Choice');
-        parameters.type_counts['Multiple Choice'] = parseInt(document.getElementById('mcq-count').value, 10);
-      }
-      // Short Answer
-      if (document.getElementById('sa-check').checked) {
-        parameters.question_types.push('Short Answer');
-        parameters.type_counts['Short Answer'] = parseInt(document.getElementById('sa-count').value, 10);
-      }
-      // True/False
-      if (document.getElementById('tf-check').checked) {
-        parameters.question_types.push('True/False');
-        parameters.type_counts['True/False'] = parseInt(document.getElementById('tf-count').value, 10);
-      }
-
       // Show loading state
-      const outputEl = document.getElementById('quiz-output');
-      outputEl.textContent = 'Generating your quiz…';
+      document.querySelector('.loading').style.display = 'block';
+      document.querySelector('.error').style.display = 'none';
+      document.getElementById('quiz-output').innerHTML = '';
 
-      try {
-        const res = await fetch('/generate_quiz', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(parameters)
-        });
-        const data = await res.json();
-        // Directly display the raw quiz output without any processing
-        outputEl.textContent = data.quiz;
-      } catch (err) {
-        outputEl.textContent = 'Error generating quiz. Please try again.';
-        console.error(err);
-      }
+      // Send request to backend
+      fetch('/generate_quiz', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(parameters)
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.querySelector('.loading').style.display = 'none';
+        if (data.quiz && data.quiz.length) {
+          // Check if the first item is an error message
+          if (data.quiz[0].question.startsWith("Error:")) {
+            document.getElementById('quiz-output').innerHTML = marked.parse(`${data.quiz[0].question}\n\n${data.quiz[0].explanation}`);
+            return;
+          }
+
+          // Format the quiz output as Markdown
+          let quizText = "Your Quiz\n\n";
+          // Add the topic as a heading with title case
+          const titleCaseTopic = parameters.topic
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+          quizText += `### ${titleCaseTopic} Quiz\n\n------------------------\n\n`;
+
+          data.quiz.forEach((q, i) => {
+            quizText += `Question ${i + 1}\n`;
+            let questionTypeLabel = q.type === "True/False" ? "True/False Question" : `${q.type} Question`;
+            quizText += `**${questionTypeLabel}:**\n`;
+            quizText += `${q.question}\n`;
+            if (q.options && q.options.length) {
+              quizText += "Options:\n";
+              q.options.forEach(opt => {
+                quizText += `  ${opt}\n`;
+              });
+            }
+            if (q.answer) {
+              quizText += `**Answer:** ${q.answer}\n`;
+            }
+            if (q.explanation) {
+              quizText += `**Explanation:** ${q.explanation}\n`;
+            }
+            quizText += "\n------------------------\n\n";
+          });
+
+          // Render the Markdown as HTML using marked.js
+          document.getElementById('quiz-output').innerHTML = marked.parse(quizText);
+        } else {
+          document.getElementById('quiz-output').innerHTML = marked.parse('Error: No quiz generated.');
+        }
+      })
+      .catch(err => {
+        document.querySelector('.loading').style.display = 'none';
+        document.querySelector('.error').style.display = 'block';
+        document.querySelector('.error').textContent = "An error occurred: " + err.message;
+        document.getElementById('quiz-output').innerHTML = marked.parse(`Error: An error occurred while generating the quiz.\n\n${err.message}`);
+      });
     });
   </script>
 </body>
