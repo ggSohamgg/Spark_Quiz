@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EarthBender AI Quiz Generator</title>
+    <title>NebulaQuiz AI Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="parallax-bg"></div>
+    <div class="starfield"></div>
     <div class="container">
-        <h1>🌍 EarthBender AI Quiz Generator</h1>
+        <h1>🌌 NebulaQuiz AI Generator</h1>
         <div id="usage-info" class="info-box"></div>
         <form id="quiz-form" autocomplete="off">
             <div class="main-fields">
@@ -22,9 +22,9 @@
                 <div class="input-group">
                     <label>Difficulty</label>
                     <div class="difficulty-group">
-                        <button type="button" class="diff-btn selected" data-value="easy">🌱 Easy</button>
-                        <button type="button" class="diff-btn" data-value="medium">🌿 Medium</button>
-                        <button type="button" class="diff-btn" data-value="hard">🌳 Hard</button>
+                        <button type="button" class="diff-btn selected" data-value="easy">Easy</button>
+                        <button type="button" class="diff-btn" data-value="medium">Medium</button>
+                        <button type="button" class="diff-btn" data-value="hard">Hard</button>
                     </div>
                     <input type="hidden" name="difficulty" id="difficulty_input" value="easy">
                 </div>
@@ -84,22 +84,21 @@
                 </div>
             </details>
 
-            <button type="submit" class="main-btn">Generate Quiz 🌋</button>
+            <button type="submit" class="main-btn">Launch Quiz 🚀</button>
         </form>
         <div id="quiz-output"></div>
     </div>
     <footer>
         <div class="about-box">
-            <h3>About EarthBender AI</h3>
+            <h3>About NebulaQuiz AI</h3>
             <p>
-                Powered by <b>Qwen-2.5-72B-Instruct</b> via OpenRouter.ai, this quiz generator crafts immersive learning experiences. 
-                Customize topics, difficulty, and question types to master any subject.<br>
-                <i>For educational use. Unleash your inner earthbender!</i>
+                Powered by <b>Qwen-2.5-72B-Instruct</b> via OpenRouter.ai, NebulaQuiz creates cosmic learning experiences. 
+                Customize your journey through the stars with tailored quizzes.<br>
+                <i>For educational use. Explore the universe of knowledge!</i>
             </p>
         </div>
-        <p>Made with 🌍 for learning. © 2025</p>
+        <p>Made with 🌠 for learning. © 2025</p>
     </footer>
-    <canvas id="particle-canvas"></canvas>
     <script>
         // Difficulty button group
         const diffGroup = document.querySelector('.difficulty-group');
@@ -162,14 +161,14 @@
                 include_explanations: formData.get('include_explanations') === "yes",
                 max_length: formData.get('max_length')
             };
-            document.getElementById('quiz-output').innerHTML = "<div class='loading'>Forging your quiz...</div>";
+            document.getElementById('quiz-output').innerHTML = "<div class='loading'>Navigating the cosmos...</div>";
             const response = await fetch('/generate_quiz', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(parameters)
             });
             const result = await response.json();
-            let html = "<h2>Your EarthBender Quiz</h2>";
+            let html = "<h2>Your Cosmic Quiz</h2>";
             if (result.quiz && result.quiz.length > 0) {
                 result.quiz.forEach((q, i) => {
                     html += `<div class='question-card'><b>${i+1}. ${q.question}</b><br>`;
@@ -189,63 +188,22 @@
                     html += "</div>";
                 });
             } else {
-                html += "<div class='error'>The earth could not yield a quiz this time.</div>";
+                html += "<div class='error'>The stars couldn't align a quiz this time.</div>";
             }
             document.getElementById('quiz-output').innerHTML = html;
             fetchUsage();
         };
 
-        // Particle effect for earth-bending vibe
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const particles = [];
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 3 + 1;
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.speedY = Math.random() * 0.5 - 0.25;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.size > 0.2) this.size -= 0.01;
-                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(107, 142, 35, 0.5)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
+        // Starfield animation
+        const starfield = document.querySelector('.starfield');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = `${Math.random() * 100}vw`;
+            star.style.top = `${Math.random() * 100}vh`;
+            star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            starfield.appendChild(star);
         }
-        function initParticles() {
-            for (let i = 0; i < 50; i++) {
-                particles.push(new Particle());
-            }
-        }
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p, i) => {
-                p.update();
-                p.draw();
-                if (p.size <= 0.2) {
-                    particles.splice(i, 1);
-                    particles.push(new Particle());
-                }
-            });
-            requestAnimationFrame(animateParticles);
-        }
-        initParticles();
-        animateParticles();
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
     </script>
 </body>
 </html>
