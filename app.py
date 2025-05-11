@@ -9,11 +9,30 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL = "qwen/qwen-2.5-72b-instruct:free"
 
-def generate_quiz(topic, difficulty, num_questions):
-    prompt = (
-        f"Generate a {num_questions}-question {difficulty} quiz on the topic '{topic}'. "
-        "For each question, provide 4 options labeled A-D, the correct answer, and a brief explanation. "
-        "Format:\n1. Question\nA. Option\nB. Option\nC. Option\nD. Option\nAnswer: ...\nExplanation: ..."
+def generate_quiz(parameters):
+    # Build prompt from parameters
+    prompt = f"Generate a quiz with the following parameters:\n"
+    prompt += f"- Topic: {parameters['topic']}\n"
+    prompt += f"- Difficulty: {parameters['difficulty']}\n"
+    prompt += f"- Number of questions: {parameters['num_questions']}\n"
+    prompt += f"- Question types: {', '.join(parameters['question_types'])}\n"
+    if parameters.get("subtopics"):
+        prompt += f"- Sub-topics: {', '.join(parameters['subtopics'])}\n"
+    if parameters.get("keywords"):
+        prompt += f"- Context keywords: {', '.join(parameters['keywords'])}\n"
+    if parameters.get("audience"):
+        prompt += f"- Target audience: {parameters['audience']}\n"
+    if parameters.get("language", "en") != "en":
+        prompt += f"- Language: {parameters['language']}\n"
+    prompt += f"- Include explanations: {'Yes' if parameters.get('include_explanations', False) else 'No'}\n"
+    if parameters.get("max_length"):
+        prompt += f"- Maximum length per question: {parameters['max_length']} words\n"
+    prompt += (
+        "Please format the quiz as follows:\n"
+        "1. Number each question\n"
+        "2. For multiple choice questions, label options as A, B, C, D\n"
+        "3. If explanations are requested, include them after each question\n"
+        "4. Make sure all information is factually correct\n"
     )
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -26,7 +45,7 @@ def generate_quiz(topic, difficulty, num_questions):
         ]
     }
     try:
-        response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=60)
+        response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=90)
         response.raise_for_status()
         data = response.json()
         quiz_text = data["choices"][0]["message"]["content"]
@@ -69,17 +88,24 @@ def get_openrouter_usage():
     headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}"}
     try:
         response = requests.get(url, headers=headers, timeout=10)
-        print("USAGE DEBUG:", response.status_code, response.text)  # Debug info for logs
         if response.status_code == 200:
             data = response.json().get("data", {})
             used = data.get("usage", 0)
-            limit = data.get("limit", 50)
-            remaining = limit - used
+            limit = data.get("limit")
+            rate_limit = data.get("rate_limit", {})
+            per_min = rate_limit.get("requests")
+            interval = rate_limit.get("interval")
+            if limit is not None:
+                remaining = limit - used
+            else:
+                remaining = None
             return {
                 "used": used,
                 "limit": limit,
                 "remaining": remaining,
-                "is_free_tier": data.get("is_free_tier", True)
+                "is_free_tier": data.get("is_free_tier", True),
+                "per_min": per_min,
+                "interval": interval
             }
         else:
             return None
@@ -93,11 +119,8 @@ def index():
 
 @app.route("/generate_quiz", methods=["POST"])
 def quiz_api():
-    data = request.json
-    topic = data.get("topic", "General Knowledge")
-    difficulty = data.get("difficulty", "medium")
-    num_questions = data.get("num_questions", 5)
-    quiz = generate_quiz(topic, difficulty, num_questions)
+    parameters = request.json
+    quiz = generate_quiz(parameters)
     return jsonify({"quiz": quiz})
 
 @app.route("/usage")
