@@ -13,27 +13,34 @@ def generate_quiz(parameters):
     """
     Build the prompt from user parameters, send to OpenRouter API,
     and parse the response into a list of questions.
+    Returns a dictionary with the quiz title and questions.
     """
     # Validate that at least one question is requested
     total_questions = sum(parameters['type_counts'].get(t, 0) for t in parameters['question_types'])
     if total_questions <= 0:
-        return [{
-            "question": "Error: Please request at least one question.",
-            "options": [],
-            "answer": "",
-            "explanation": "No questions were requested. Please select at least one question type with a quantity greater than 0.",
-            "type": ""
-        }]
+        return {
+            "title": "Error Quiz",
+            "questions": [{
+                "question": "Error: Please request at least one question.",
+                "options": [],
+                "answer": "",
+                "explanation": "No questions were requested. Please select at least one question type with a quantity greater than 0.",
+                "type": ""
+            }]
+        }
 
     # Check if API key is set
     if not OPENROUTER_API_KEY:
-        return [{
-            "question": "Error: API key not configured.",
-            "options": [],
-            "answer": "",
-            "explanation": "The OPENROUTER_API_KEY environment variable is not set. Please configure it to use the OpenRouter API.",
-            "type": ""
-        }]
+        return {
+            "title": "Error Quiz",
+            "questions": [{
+                "question": "Error: API key not configured.",
+                "options": [],
+                "answer": "",
+                "explanation": "The OPENROUTER_API_KEY environment variable is not set. Please configure it to use the OpenRouter API.",
+                "type": ""
+            }]
+        }
 
     prompt = f"Generate a quiz with the following parameters:\n"
     prompt += f"- Topic: {parameters['topic']}\n"
@@ -80,25 +87,39 @@ def generate_quiz(parameters):
         data = response.json()
         quiz_text = data["choices"][0]["message"]["content"]
         print(f"Raw API Response: {quiz_text}")  # Debug: Log the raw response
+
+        # Extract the title from the quiz_text (e.g., ### World War 1 History Quiz)
+        title_match = re.match(r"^###\s*(.+?)(?:\n|$)", quiz_text, re.MULTILINE)
+        title = title_match.group(1).strip() if title_match else "Quiz"
+
         questions = parse_quiz_text(quiz_text)
         if not questions:
-            return [{
-                "question": "Error: No questions generated.",
-                "options": [],
-                "answer": "",
-                "explanation": "The API did not return any valid questions. This might be due to rate limits (10 requests/min, 50/day) or an unexpected response format.",
-                "type": ""
-            }]
-        return questions
+            return {
+                "title": title,
+                "questions": [{
+                    "question": "Error: No questions generated.",
+                    "options": [],
+                    "answer": "",
+                    "explanation": "The API did not return any valid questions. This might be due to rate limits (10 requests/min, 50/day) or an unexpected response format.",
+                    "type": ""
+                }]
+            }
+        return {
+            "title": title,
+            "questions": questions
+        }
     except requests.exceptions.RequestException as e:
         print(f"Error from OpenRouter API: {e}")
-        return [{
-            "question": "Error: Failed to generate quiz.",
-            "options": [],
-            "answer": "",
-            "explanation": f"API request failed: {str(e)}. This might be due to rate limits (10 requests/min, 50/day) or an invalid API key.",
-            "type": ""
-        }]
+        return {
+            "title": "Error Quiz",
+            "questions": [{
+                "question": "Error: Failed to generate quiz.",
+                "options": [],
+                "answer": "",
+                "explanation": f"API request failed: {str(e)}. This might be due to rate limits (10 requests/min, 50/day) or an invalid API key.",
+                "type": ""
+            }]
+        }
 
 def parse_quiz_text(quiz_text):
     """
@@ -111,7 +132,6 @@ def parse_quiz_text(quiz_text):
 
     questions = []
     # Split the text into sections based on #### headings, preserving the headings in the split
-    # Use re.MULTILINE flag instead of embedding (?m) in the pattern
     sections = re.split(r"(?=^####\s.*$)", quiz_text, flags=re.MULTILINE)
     sections = [section.strip() for section in sections if section.strip()]
     print(f"Debug: Split sections: {sections}")
@@ -217,12 +237,13 @@ def quiz_api():
     """Receive quiz parameters from the frontend, generate the quiz, and return as JSON."""
     try:
         parameters = request.json
-        quiz = generate_quiz(parameters)
-        return jsonify({"quiz": quiz})
+        result = generate_quiz(parameters)
+        return jsonify(result)
     except Exception as e:
         print(f"Error in quiz_api: {str(e)}")
         return jsonify({
-            "quiz": [{
+            "title": "Error Quiz",
+            "questions": [{
                 "question": "Error: Server error occurred.",
                 "options": [],
                 "answer": "",
