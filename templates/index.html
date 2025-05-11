@@ -8,6 +8,35 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css" />
+  <!-- Add marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
+  <style>
+    /* Style the quiz output div to match the previous textarea design */
+    #quiz-output {
+      width: 100%;
+      min-height: 320px;
+      background: #23213A;
+      color: #fff;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      border: 1.5px solid #3E3968;
+      padding: 20px;
+      margin-top: 24px;
+      overflow-y: auto;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    /* Ensure bold text from Markdown rendering looks good */
+    #quiz-output strong {
+      font-weight: 700;
+    }
+    /* Style horizontal rules (for the separators) */
+    #quiz-output hr {
+      border: 0;
+      border-top: 1px solid #3E3968;
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -111,8 +140,8 @@
         <button type="submit" class="main-btn">Generate Quiz</button>
       </div>
     </form>
-    <!-- Output as a single continuous text field -->
-    <textarea id="quiz-output" aria-live="polite" readonly rows="14" style="width:100%; min-height:320px; background:#23213A; color:#fff; border-radius:12px; font-size:1.1rem; border:1.5px solid #3E3968; padding:20px; margin-top:24px; resize:vertical;"></textarea>
+    <!-- Output as a div with rendered Markdown -->
+    <div id="quiz-output" aria-live="polite"></div>
     <div class="loading" style="display:none;">Generating your quiz...</div>
     <div class="error" style="display:none;"></div>
     <section class="about-box">
@@ -220,7 +249,7 @@
       // Show loading state
       document.querySelector('.loading').style.display = 'block';
       document.querySelector('.error').style.display = 'none';
-      document.getElementById('quiz-output').value = '';
+      document.getElementById('quiz-output').innerHTML = '';
 
       // Send request to backend
       fetch('/generate_quiz', {
@@ -234,11 +263,11 @@
         if (data.quiz && data.quiz.length) {
           // Check if the first item is an error message
           if (data.quiz[0].question.startsWith("Error:")) {
-            document.getElementById('quiz-output').value = `${data.quiz[0].question}\n\n${data.quiz[0].explanation}`;
+            document.getElementById('quiz-output').innerHTML = marked.parse(`${data.quiz[0].question}\n\n${data.quiz[0].explanation}`);
             return;
           }
 
-          // Format the quiz output as a continuous text string for the textarea
+          // Format the quiz output as Markdown
           let quizText = "Your Quiz\n\n";
           // Add the topic as a heading with title case
           const titleCaseTopic = parameters.topic
@@ -259,23 +288,25 @@
               });
             }
             if (q.answer) {
-              quizText += `Answer: ${q.answer}\n`;
+              quizText += `**Answer:** ${q.answer}\n`;
             }
             if (q.explanation) {
-              quizText += `Explanation: ${q.explanation}\n`;
+              quizText += `**Explanation:** ${q.explanation}\n`;
             }
             quizText += "\n------------------------\n\n";
           });
-          document.getElementById('quiz-output').value = quizText;
+
+          // Render the Markdown as HTML using marked.js
+          document.getElementById('quiz-output').innerHTML = marked.parse(quizText);
         } else {
-          document.getElementById('quiz-output').value = 'Error: No quiz generated.';
+          document.getElementById('quiz-output').innerHTML = marked.parse('Error: No quiz generated.');
         }
       })
       .catch(err => {
         document.querySelector('.loading').style.display = 'none';
         document.querySelector('.error').style.display = 'block';
         document.querySelector('.error').textContent = "An error occurred: " + err.message;
-        document.getElementById('quiz-output').value = `Error: An error occurred while generating the quiz.\n\n${err.message}`;
+        document.getElementById('quiz-output').innerHTML = marked.parse(`Error: An error occurred while generating the quiz.\n\n${err.message}`);
       });
     });
   </script>
