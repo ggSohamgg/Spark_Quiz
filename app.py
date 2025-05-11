@@ -41,6 +41,7 @@ def generate_quiz(parameters):
         "You are a specialized quiz generation API that MUST return properly formatted content. "
         "I need you to generate a quiz with specific formatting requirements. "
         "Your response MUST be properly formatted text (NOT JSON) that follows the exact structure specified below.\n\n"
+        "For long responses DO NOT RETURN JSON Only FORMATTED TEXT NO JSON ANYHOW\n"
     )
     
     prompt += f"Generate a quiz with the following parameters:\n"
