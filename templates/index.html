@@ -111,7 +111,8 @@
         <button type="submit" class="main-btn">Generate Quiz</button>
       </div>
     </form>
-    <section id="quiz-output" aria-live="polite"></section>
+    <!-- Output as a single continuous text field -->
+    <textarea id="quiz-output" aria-live="polite" readonly rows="14" style="width:100%; min-height:320px; background:#23213A; color:#fff; border-radius:12px; font-size:1.1rem; border:1.5px solid #3E3968; padding:20px; margin-top:24px; resize:vertical;"></textarea>
     <div class="loading" style="display:none;">Generating your quiz...</div>
     <div class="error" style="display:none;"></div>
     <section class="about-box">
@@ -129,7 +130,7 @@
       </div>
     </section>
     <footer>
-      © 2025 SparkQuiz — Crafted with <span aria-label="love">❤️</span> for learning.
+      &copy; 2025 SparkQuiz &mdash; Crafted with <span aria-label="love">❤️</span> for learning.
     </footer>
   </div>
   <script>
@@ -150,8 +151,6 @@
 
     // FORM SUBMISSION: Validate max 15 per type, then send per-type quantities to Flask
     document.getElementById('quiz-form').addEventListener('submit', function(e) {
-      e.preventDefault(); // Always prevent default form submission
-
       let mcqVal = document.getElementById('type-mcq').checked ? parseInt(document.getElementById('mcq-quantity').value || "0") : 0;
       let shortVal = document.getElementById('type-short').checked ? parseInt(document.getElementById('short-quantity').value || "0") : 0;
       let tfVal = document.getElementById('type-truefalse').checked ? parseInt(document.getElementById('truefalse-quantity').value || "0") : 0;
@@ -159,7 +158,8 @@
       // Validation: no more than 15 for any type
       if (mcqVal > 15 || shortVal > 15 || tfVal > 15) {
         alert("Maximum allowed per category is 15.");
-        return; // Stop submission if validation fails
+        e.preventDefault();
+        return;
       }
 
       const topic = document.getElementById('topic').value;
@@ -201,7 +201,7 @@
 
       document.querySelector('.loading').style.display = '';
       document.querySelector('.error').style.display = 'none';
-      document.getElementById('quiz-output').innerHTML = '';
+      document.getElementById('quiz-output').value = '';
 
       fetch('/generate_quiz', {
         method: 'POST',
@@ -211,22 +211,22 @@
       .then(res => res.json())
       .then(data => {
         document.querySelector('.loading').style.display = 'none';
+        let output = '';
         if (data.quiz && data.quiz.length) {
-          let html = '';
           data.quiz.forEach((q, i) => {
-            html += `<div class="question-card"><div><b>Q${i+1}:</b> ${q.question}</div>`;
+            output += `Q${i+1}: ${q.question}\n`;
             if (q.options && q.options.length) {
-              html += `<ul>`;
-              q.options.forEach(opt => html += `<li>${opt}</li>`);
-              html += `</ul>`;
+              q.options.forEach(opt => output += `${opt}\n`);
             }
-            if (q.answer) html += `<div class="answer">Answer: ${q.answer}</div>`;
-            if (q.explanation) html += `<div class="explanation">${q.explanation}</div>`;
-            html += `</div>`;
+            if (q.answer) output += `Answer: ${q.answer}\n`;
+            if (q.explanation) output += `Explanation: ${q.explanation}\n`;
+            output += '\n';
           });
-          document.getElementById('quiz-output').innerHTML = html;
+          document.getElementById('quiz-output').value = output.trim();
+        } else if (data.quiz && data.quiz.length === 1 && data.quiz[0].explanation) {
+          document.getElementById('quiz-output').value = data.quiz[0].explanation;
         } else {
-          document.getElementById('quiz-output').innerHTML = '<div class="error">No quiz generated.</div>';
+          document.getElementById('quiz-output').value = 'No quiz generated.';
         }
       })
       .catch(err => {
