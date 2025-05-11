@@ -5,60 +5,77 @@
 }
 
 body {
-    background: linear-gradient(135deg, #1a2a1e 0%, #3b5e3a 100%);
-    color: #e6f0da;
-    font-family: 'Oxanium', sans-serif;
+    background: linear-gradient(135deg, #0d0d2b 0%, #1a1a3d 100%);
+    color: #e0e0ff;
+    font-family: 'Roboto Mono', monospace;
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
 }
 
-.parallax-bg {
+.starfield {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1920&q=80') no-repeat center center;
-    background-size: cover;
-    opacity: 0.15;
+    width: 100vw;
+    height: 100vh;
     z-index: -1;
-    transform: translateZ(-1px) scale(1.5);
+}
+
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #ffffff;
+    opacity: 0.7;
+    border-radius: 50%;
+    animation: twinkle infinite alternate;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.8; }
 }
 
 .container {
-    max-width: 1000px;
-    margin: 40px auto;
-    background: rgba(30, 42, 30, 0.85);
-    backdrop-filter: blur(10px);
+    width: 100vw;
+    min-height: 100vh;
     padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 h1 {
-    color: #98c379;
-    text-align: center;
-    font-size: 3rem;
+    color: #00ffea;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3.5rem;
     font-weight: 700;
+    text-align: center;
     margin-bottom: 20px;
-    text-shadow: 0 2px 10px rgba(152, 195, 121, 0.5);
+    text-shadow: 0 0 20px rgba(0, 255, 234, 0.5);
 }
 
 .info-box {
-    background: rgba(59, 94, 58, 0.7);
-    color: #e6f0da;
-    border-radius: 12px;
+    background: rgba(0, 255, 234, 0.1);
+    color: #00ffea;
+    border: 1px solid rgba(0, 255, 234, 0.3);
+    border-radius: 10px;
     padding: 15px;
     margin-bottom: 30px;
     text-align: center;
     font-size: 1.1rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 0 15px rgba(0, 255, 234, 0.2);
 }
 
 .main-fields {
     display: grid;
-    gap: 20px;
+    gap: 25px;
+    max-width: 800px;
+    width: 100%;
 }
 
 .input-group {
@@ -67,27 +84,28 @@ h1 {
 }
 
 label {
-    color: #c3e88d;
-    font-weight: 600;
-    font-size: 1.2rem;
-    margin-bottom: 8px;
+    color: #00ffea;
+    font-weight: 500;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
 }
 
 input[type="text"], input[type="number"], select {
     width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: rgba(59, 94, 58, 0.5);
-    color: #e6f0da;
+    padding: 15px;
+    border: 1px solid rgba(0, 255, 234, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e0e0ff;
     font-size: 1.1rem;
     transition: all 0.3s ease;
 }
 
 input:focus, select:focus {
     outline: none;
-    background: rgba(59, 94, 58, 0.8);
-    box-shadow: 0 0 10px rgba(152, 195, 121, 0.5);
+    border-color: #00ffea;
+    box-shadow: 0 0 10px rgba(0, 255, 234, 0.5);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .difficulty-group, .question-type-group {
@@ -98,13 +116,13 @@ input:focus, select:focus {
 }
 
 .diff-btn, .qt-btn {
-    background: rgba(152, 195, 121, 0.3);
-    color: #e6f0da;
-    border: 1px solid #98c379;
-    border-radius: 12px;
+    background: rgba(0, 255, 234, 0.1);
+    color: #e0e0ff;
+    border: 1px solid rgba(0, 255, 234, 0.3);
+    border-radius: 8px;
     padding: 12px 20px;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -113,13 +131,14 @@ input:focus, select:focus {
 }
 
 .diff-btn.selected, .qt-btn.selected {
-    background: #98c379;
-    color: #1a2a1e;
-    box-shadow: 0 4px 15px rgba(152, 195, 121, 0.5);
+    background: rgba(0, 255, 234, 0.3);
+    color: #0d0d2b;
+    border-color: #00ffea;
+    box-shadow: 0 0 15px rgba(0, 255, 234, 0.5);
 }
 
 .diff-btn:hover, .qt-btn:hover {
-    background: rgba(152, 195, 121, 0.5);
+    background: rgba(0, 255, 234, 0.2);
     transform: translateY(-2px);
 }
 
@@ -129,16 +148,19 @@ input:focus, select:focus {
 
 .advanced-options {
     margin-top: 30px;
-    background: rgba(59, 94, 58, 0.5);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 234, 0.2);
+    border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 0 15px rgba(0, 255, 234, 0.1);
 }
 
 .advanced-options summary {
-    color: #98c379;
-    font-weight: 700;
-    font-size: 1.3rem;
+    color: #00ffea;
+    font-weight: 600;
+    font-size: 1.4rem;
     cursor: pointer;
     padding-bottom: 10px;
 }
@@ -150,40 +172,46 @@ input:focus, select:focus {
 
 .main-btn {
     width: 100%;
-    background: linear-gradient(90deg, #98c379 0%, #68a063 100%);
-    color: #1a2a1e;
-    font-weight: 700;
+    max-width: 400px;
+    background: linear-gradient(90deg, #00ffea 0%, #ff00ff 100%);
+    color: #0d0d2b;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
     border: none;
-    border-radius: 12px;
-    padding: 18px;
-    margin-top: 30px;
-    font-size: 1.2rem;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 40px;
+    font-size: 1.3rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(152, 195, 121, 0.4);
+    box-shadow: 0 0 20px rgba(0, 255, 234, 0.5);
 }
 
 .main-btn:hover {
-    background: linear-gradient(90deg, #68a063 0%, #98c379 100%);
     transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(152, 195, 121, 0.6);
+    box-shadow: 0 0 30px rgba(0, 255, 234, 0.7);
+    background: linear-gradient(90deg, #ff00ff 0%, #00ffea 100%);
 }
 
 #quiz-output {
-    margin-top: 40px;
+    margin-top: 50px;
+    max-width: 1000px;
+    width: 100%;
 }
 
 .question-card {
-    background: rgba(59, 94, 58, 0.7);
-    border-radius: 12px;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 234, 0.2);
+    border-radius: 10px;
+    padding: 25px;
     margin-bottom: 20px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 234, 0.1);
     transition: transform 0.3s ease;
 }
 
 .question-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(0, 255, 234, 0.3);
 }
 
 .question-card ul {
@@ -192,13 +220,13 @@ input:focus, select:focus {
 }
 
 .answer {
-    color: #98c379;
+    color: #00ffea;
     margin-top: 10px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .explanation {
-    color: #c3e88d;
+    color: #e0e0ff;
     margin-top: 5px;
     font-size: 0.95em;
     font-style: italic;
@@ -206,55 +234,47 @@ input:focus, select:focus {
 
 .loading {
     text-align: center;
-    color: #98c379;
-    font-size: 1.3rem;
+    color: #00ffea;
+    font-size: 1.4rem;
     margin-top: 20px;
     animation: pulse 1.5s infinite;
 }
 
 .error {
-    color: #e06c75;
-    font-weight: 600;
+    color: #ff00ff;
+    font-weight: 500;
     text-align: center;
     margin-top: 20px;
 }
 
 footer {
     text-align: center;
-    color: #c3e88d;
-    margin: 40px 0 20px;
+    color: #e0e0ff;
+    margin: 50px 0 20px;
     font-size: 1rem;
 }
 
 .about-box {
-    background: rgba(59, 94, 58, 0.7);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 234, 0.2);
+    border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 234, 0.1);
 }
 
 @keyframes pulse {
-    0% { opacity: 0.6; }
+    0% { opacity: 0.5; }
     50% { opacity: 1; }
-    100% { opacity: 0.6; }
-}
-
-#particle-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -2;
-    pointer-events: none;
+    100% { opacity: 0.5; }
 }
 
 @media (max-width: 768px) {
     .container {
-        margin: 20px;
         padding: 20px;
     }
     h1 {
-        font-size: 2rem;
+        font-size: 2.5rem;
     }
     .main-fields {
         gap: 15px;
