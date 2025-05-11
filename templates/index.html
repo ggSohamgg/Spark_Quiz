@@ -9,54 +9,6 @@
   <!-- Main font and heading/button font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    /* Hide default cursor everywhere */
-    body, * {
-      cursor: none !important;
-    }
-
-    /* Custom Cursor Container */
-    #custom-cursor {
-      position: fixed;
-      left: 0; top: 0;
-      pointer-events: none;
-      z-index: 9999;
-      mix-blend-mode: lighten;
-    }
-
-    /* Red Dot */
-    .cursor-dot {
-      width: 14px;
-      height: 14px;
-      background: #ff2222;
-      border-radius: 50%;
-      position: absolute;
-      left: 0; top: 0;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 8px 2px #ff2222aa;
-      transition: background 0.2s;
-    }
-
-    /* Red Ring */
-    .cursor-ring {
-      width: 60px;
-      height: 60px;
-      border: 2.5px solid #ff2222;
-      border-radius: 50%;
-      position: absolute;
-      left: 0; top: 0;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 18px 2px #ff222233;
-      transition: width 0.18s, height 0.18s, border 0.18s;
-    }
-
-    /* Optional: Make ring shrink on click */
-    body:active .cursor-ring {
-      width: 40px;
-      height: 40px;
-      border-width: 4px;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
@@ -208,18 +160,5 @@
       &copy; 2025 SparkQuiz &mdash; Crafted with <span aria-label="love">❤️</span> for learning.
     </footer>
   </div>
-
-  <!-- Custom Cursor Elements -->
-  <div id="custom-cursor">
-    <div class="cursor-dot"></div>
-    <div class="cursor-ring"></div>
-  </div>
-  <script>
-    const cursor = document.getElementById('custom-cursor');
-    document.addEventListener('mousemove', e => {
-      cursor.style.left = `${e.clientX}px`;
-      cursor.style.top = `${e.clientY}px`;
-    });
-  </script>
 </body>
 </html>
