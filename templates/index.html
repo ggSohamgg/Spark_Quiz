@@ -111,8 +111,8 @@
         <button type="submit" class="main-btn">Generate Quiz</button>
       </div>
     </form>
-    <!-- Output as a single continuous text field -->
-    <textarea id="quiz-output" aria-live="polite" readonly rows="14" style="width:100%; min-height:320px; background:#23213A; color:#fff; border-radius:12px; font-size:1.1rem; border:1.5px solid #3E3968; padding:20px; margin-top:24px; resize:vertical;"></textarea>
+    <!-- Output as a div with plain text -->
+    <div id="quiz-output" aria-live="polite"></div>
     <div class="loading" style="display:none;">Generating your quiz...</div>
     <div class="error" style="display:none;"></div>
     <section class="about-box">
@@ -220,7 +220,7 @@
       // Show loading state
       document.querySelector('.loading').style.display = 'block';
       document.querySelector('.error').style.display = 'none';
-      document.getElementById('quiz-output').value = '';
+      document.getElementById('quiz-output').textContent = '';
 
       // Send request to backend
       fetch('/generate_quiz', {
@@ -228,37 +228,27 @@
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(parameters)
       })
-      .then(res => res.json())
+      .then(res => {
+        // Check if the response is OK
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => {
         document.querySelector('.loading').style.display = 'none';
-        if (data.quiz && data.quiz.length) {
-          // Format the quiz output as a continuous text string for the textarea
-          let quizText = "Your Quiz\n\n";
-          data.quiz.forEach((q, i) => {
-            quizText += `Question ${i + 1}\n${q.question}\n`;
-            if (q.options && q.options.length) {
-              quizText += "Options:\n";
-              q.options.forEach(opt => {
-                quizText += `  ${opt}\n`;
-              });
-            }
-            if (q.answer) {
-              quizText += `Answer: ${q.answer}\n`;
-            }
-            if (q.explanation) {
-              quizText += `Explanation: ${q.explanation}\n`;
-            }
-            quizText += "\n------------------------\n\n";
-          });
-          document.getElementById('quiz-output').value = quizText;
+        if (data.quiz_text) {
+          // Display the raw quiz text directly
+          document.getElementById('quiz-output').textContent = data.quiz_text;
         } else {
-          document.getElementById('quiz-output').value = 'Error: No quiz generated.';
+          document.getElementById('quiz-output').textContent = 'Error: No quiz generated.';
         }
       })
       .catch(err => {
         document.querySelector('.loading').style.display = 'none';
         document.querySelector('.error').style.display = 'block';
         document.querySelector('.error').textContent = "An error occurred: " + err.message;
+        document.getElementById('quiz-output').textContent = `Error: An error occurred while generating the quiz.\n\n${err.message}`;
       });
     });
   </script>
