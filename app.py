@@ -95,57 +95,49 @@ def parse_quiz_text(quiz_text):
     Each question includes its type, options, answer, and explanation.
     """
     if not quiz_text or not quiz_text.strip():
+        print("Debug: quiz_text is empty or None")
         return []  # Return empty list if quiz_text is empty
 
     questions = []
-    # Split the text into sections based on #### headings
-    sections = re.split(r"(?m)^####\s.*$", quiz_text)
+    # Split the text into sections based on #### headings, preserving the headings in the split
+    # Use a positive lookahead to include the delimiter in the split sections
+    sections = re.split(r"(?=(?m)^####\s.*$)", quiz_text)
     sections = [section.strip() for section in sections if section.strip()]
+    print(f"Debug: Split sections: {sections}")
 
-    # The first section might be the topic heading (### Topic Quiz), remove it
+    # The first section might be the topic heading (### Topic Quiz), remove it if present
     if sections and sections[0].startswith("###"):
         sections.pop(0)
 
-    # Each remaining section should be a question block
-    question_blocks = []
-    current_block = None
-    for i, section in enumerate(sections):
-        # Extract the question heading (#### Question X: Type) from the original text
-        heading_match = re.search(r"####\s.*?(?=\n)", quiz_text)
-        if heading_match:
-            heading = heading_match.group(0)
-            match = re.match(r"#### Question \d+: (Multiple Choice|Short Answer|True/False)", heading)
-            if match:
-                if current_block:
-                    question_blocks.append(current_block)
-                current_block = {"section": section, "type": match.group(1)}
-        else:
-            # Append to the current block if no heading is found
-            if current_block:
-                current_block["section"] += "\n" + section
+    # Process each section as a question block
+    for section in sections:
+        # Extract the question heading (#### Question X: Type)
+        heading_match = re.match(r"####\s*Question\s*\d+:\s*(Multiple Choice|Short Answer|True/False)", section, re.IGNORECASE)
+        if not heading_match:
+            print(f"Debug: Skipping section, no valid heading found: {section[:100]}...")
+            continue
 
-        # Update the position in the text for the next heading match
-        if heading_match:
-            quiz_text = quiz_text[heading_match.end():]
+        question_type = heading_match.group(1)
+        # Remove the heading from the section content
+        section_content = section[heading_match.end():].strip()
+        print(f"Debug: Processing section for type {question_type}: {section_content[:100]}...")
 
-    if current_block:
-        question_blocks.append(current_block)
-
-    for block in question_blocks:
-        section = block["section"]
-        q = {"question": "", "options": [], "answer": "", "explanation": "", "type": block["type"]}
-        lines = section.split("\n")
+        q = {"question": "", "options": [], "answer": "", "explanation": "", "type": question_type}
+        lines = section_content.split("\n")
         in_options = False
         in_explanation = False
 
-        for line in lines:
+        for i, line in enumerate(lines):
             line = line.strip()
             if not line:
                 continue
 
-            # Detect the question text (starts with ** and ends with **)
-            if line.startswith("**") and line.endswith("**"):
-                q["question"] = line.strip("**")
+            # Detect the question text (first non-empty line after the heading, or wrapped in **)
+            if not q["question"]:
+                if line.startswith("**") and line.endswith("**"):
+                    q["question"] = line.strip("**")
+                else:
+                    q["question"] = line
                 continue
 
             # Detect options (A), B), etc.)
@@ -154,15 +146,27 @@ def parse_quiz_text(quiz_text):
                 in_options = True
                 continue
 
-            # Detect answer line
-            if line.lower().startswith("**answer:**"):
-                q["answer"] = line.split(":", 1)[-1].strip()
+            # Detect answer line (case-insensitive)
+            if re.match(r"(?i)^(\*\*)?answer:(\*\*)?\s*", line):
+                answer_text = re.split(r"(?i)^(\*\*)?answer:(\*\*)?\s*", line, 1)[-1].strip()
+                # Remove ** markers if they exist
+                if answer_text.startswith("**") and answer_text.endswith("**"):
+                    answer_text = answer_text.strip("**").strip()
+                # Only update the answer if we haven't already set it (to handle duplicates)
+                if not q["answer"]:
+                    q["answer"] = answer_text
+                else:
+                    print(f"Debug: Found duplicate answer in section, keeping last: {answer_text}")
                 in_options = False
                 continue
 
-            # Detect explanation line
-            if line.lower().startswith("**explanation:**"):
-                q["explanation"] = line.split(":", 1)[-1].strip()
+            # Detect explanation line (case-insensitive)
+            if re.match(r"(?i)^(\*\*)?explanation:(\*\*)?\s*", line):
+                explanation_text = re.split(r"(?i)^(\*\*)?explanation:(\*\*)?\s*", line, 1)[-1].strip()
+                # Remove ** markers if they exist
+                if explanation_text.startswith("**") and explanation_text.endswith("**"):
+                    explanation_text = explanation_text.strip("**").strip()
+                q["explanation"] = explanation_text
                 in_options = False
                 in_explanation = True
                 continue
@@ -184,8 +188,12 @@ def parse_quiz_text(quiz_text):
                     if opt.startswith(q["answer"] + ")"):
                         q["answer"] = opt
                         break
+            print(f"Debug: Parsed question: {q}")
             questions.append(q)
+        else:
+            print(f"Debug: Skipped section, no question text found: {section[:100]}...")
 
+    print(f"Debug: Final questions list: {questions}")
     return questions
 
 @app.route("/")
