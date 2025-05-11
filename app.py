@@ -77,6 +77,7 @@ def generate_quiz(parameters):
         "5. DO NOT include any HTML, XML, or other markup languages\n"
         "6. DO NOT wrap your response in code blocks or JSON\n"
         "7. Make sure all information is factually correct\n\n"
+        "8. Provide atleast 3 lines and at most 4 lines for explanation for short questions\n"
         
         "Example format for one question:\n"
         "#### Question 1: Multiple Choice\n"
