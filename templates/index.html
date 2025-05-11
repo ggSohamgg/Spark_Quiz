@@ -72,43 +72,37 @@
       <details class="advanced-options">
         <summary>Advanced Options</summary>
         <div class="advanced-content">
-          <div class="row">
-            <div class="input-group">
-              <label for="subtopics">Specific Sub-topics <span class="field-desc">(Optional, comma separated)</span></label>
-              <input type="text" id="subtopics" name="subtopics" placeholder='e.g. Wave-particle duality, Quantum entanglement' />
-            </div>
-            <div class="input-group">
-              <label for="context">Context Keywords <span class="field-desc">(Optional, comma separated)</span></label>
-              <input type="text" id="context" name="context" placeholder='e.g. experiment, theory, equation' />
-            </div>
+          <div class="input-group">
+            <label for="subtopics">Specific Sub-topics <span class="field-desc">(Optional, comma separated)</span></label>
+            <input type="text" id="subtopics" name="subtopics" placeholder='e.g. Wave-particle duality, Quantum entanglement' />
           </div>
-          <div class="row">
-            <div class="input-group">
-              <label for="audience">Target Audience <span class="field-desc">(Optional)</span></label>
-              <input type="text" id="audience" name="audience" placeholder='e.g. Undergraduate Physics Students' />
-            </div>
-            <div class="input-group">
-              <label for="language">Language <span class="field-desc">(Optional, default: English)</span></label>
-              <input type="text" id="language" name="language" placeholder='e.g. en, es, fr' />
-            </div>
+          <div class="input-group">
+            <label for="context">Context Keywords <span class="field-desc">(Optional, comma separated)</span></label>
+            <input type="text" id="context" name="context" placeholder='e.g. experiment, theory, equation' />
           </div>
-          <div class="row">
-            <div class="input-group">
-              <label for="max-length">Maximum Length per Question <span class="field-desc">(Optional, in words)</span></label>
-              <input type="number" id="max-length" name="max-length" min="1" placeholder="e.g. 30" />
-            </div>
-            <div class="input-group">
-              <label>Include Explanations?</label>
-              <div class="radio-group">
-                <label class="radio-label">
-                  <input type="radio" name="include-explanations" value="yes" checked />
-                  Yes
-                </label>
-                <label class="radio-label">
-                  <input type="radio" name="include-explanations" value="no" />
-                  No
-                </label>
-              </div>
+          <div class="input-group">
+            <label for="audience">Target Audience <span class="field-desc">(Optional)</span></label>
+            <input type="text" id="audience" name="audience" placeholder='e.g. Undergraduate Physics Students' />
+          </div>
+          <div class="input-group">
+            <label for="language">Language <span class="field-desc">(Optional, default: English)</span></label>
+            <input type="text" id="language" name="language" placeholder='e.g. en, es, fr' />
+          </div>
+          <div class="input-group">
+            <label for="max-length">Maximum Length per Question <span class="field-desc">(Optional, in words)</span></label>
+            <input type="number" id="max-length" name="max-length" min="1" placeholder="e.g. 30" class="quantity-input-custom" />
+          </div>
+          <div class="input-group">
+            <label>Include Explanations?</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="include-explanations" value="yes" checked />
+                Yes
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="include-explanations" value="no" />
+                No
+              </label>
             </div>
           </div>
         </div>
@@ -121,9 +115,25 @@
     <div class="loading" style="display:none;">Generating your quiz...</div>
     <div class="error" style="display:none;"></div>
     <section class="about-box">
-      SparkQuiz is powered by free OpenRouter (Qwen2.5-72B-Instruct) &mdash; 10 requests per minute, 50 per day.<br>
-      If not working, please wait until the next day.<br>
-      <a class="about-link" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct" target="_blank" rel="noopener">Check the model card: Qwen2.5-72B-Instruct</a>
+      <div class="about-title">About SparkQuiz</div>
+      <div>
+        <strong>SparkQuiz</strong> is your AI-powered quiz generator for any subject, audience, or language.  
+        <br><br>
+        <span>
+          Powered by <b>Qwen2.5-72B-Instruct</b> via free OpenRouter (10 requests/min, 50/day).  
+          If not working, please wait until the next day.
+        </span>
+        <br><br>
+        <span>
+          SparkQuiz crafts high-quality, fact-checked quizzes tailored to your needs.  
+          Choose question types, difficulty, sub-topics, and more.  
+          Explanations are included for deeper learning and understanding.
+        </span>
+        <br><br>
+        <a class="about-link" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct" target="_blank" rel="noopener">
+          Check the model card: Qwen2.5-72B-Instruct
+        </a>
+      </div>
     </section>
     <footer>
       &copy; 2025 SparkQuiz &mdash; Crafted with <span aria-label="love">❤️</span> for learning.
@@ -173,7 +183,6 @@
         type_counts["True/False"] = parseInt(document.getElementById('truefalse-quantity').value || "1");
       }
 
-      // Compose parameters
       const parameters = {
         topic,
         difficulty,
@@ -187,7 +196,6 @@
         type_counts
       };
 
-      // Show loading
       document.querySelector('.loading').style.display = '';
       document.querySelector('.error').style.display = 'none';
       document.getElementById('quiz-output').innerHTML = '';
