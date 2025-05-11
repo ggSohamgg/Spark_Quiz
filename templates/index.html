@@ -3,9 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <title>Quiz Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Link to your CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Quiz Generator</h1>
-    <p>Your backend is working! Build your custom UI here.</p>
+    <div class="container">
+        <h1>🎓 AI Quiz Generator</h1>
+        <div class="info-box">
+            Generate educational quizzes on any topic! Powered by AI.
+        </div>
+        <form id="quiz-form">
+            <label for="topic">Topic:</label>
+            <input type="text" id="topic" name="topic" required placeholder="e.g. World History, Python, Math">
+
+            <label for="difficulty">Difficulty:</label>
+            <select id="difficulty" name="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+
+            <label for="num_questions">Number of Questions:</label>
+            <input type="number" id="num_questions" name="num_questions" min="1" max="10" value="5">
+
+            <button type="submit">Generate Quiz</button>
+        </form>
+        <div id="quiz-output"></div>
+    </div>
+    <footer>
+        <p>Made with ❤️ for education</p>
+    </footer>
+    <script>
+    document.getElementById('quiz-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+            topic: form.topic.value,
+            difficulty: form.difficulty.value,
+            num_questions: form.num_questions.value
+        };
+        document.getElementById('quiz-output').innerHTML = "<div class='loading'>Generating quiz...</div>";
+        const response = await fetch('/generate_quiz', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        let html = "<h2>Your Quiz</h2>";
+        result.quiz.forEach((q, i) => {
+            html += `<div class='question-card'><b>${i+1}. ${q.question}</b><br>`;
+            if (q.options) {
+                html += "<ul>";
+                q.options.forEach(opt => {
+                    html += `<li>${opt}</li>`;
+                });
+                html += "</ul>";
+            }
+            html += `<div class='answer'><b>Answer:</b> ${q.answer}</div>`;
+            html += `<div class='explanation'><i>${q.explanation}</i></div>`;
+            html += "</div>";
+        });
+        document.getElementById('quiz-output').innerHTML = html;
+    }
+    </script>
 </body>
 </html>
