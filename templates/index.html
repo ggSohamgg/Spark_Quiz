@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Main font and heading/button font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
-  <!-- Corrected path to CSS file -->
   <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
@@ -66,23 +65,29 @@
           <div class="question-types-row">
             <div class="question-type-group">
               <label class="checkbox-label">
-                <input type="checkbox" name="type-mcq" checked />
+                <input type="checkbox" name="type-mcq" id="type-mcq" checked />
                 Multiple Choice
               </label>
+              <div class="type-quantity" id="mcq-quantity-box">
+                <label for="mcq-quantity" class="quantity-label">How many Multiple Choice?</label>
+                <input type="number" id="mcq-quantity" name="mcq-quantity" min="1" max="50" value="1" />
+              </div>
               <label class="checkbox-label">
-                <input type="checkbox" name="type-short" />
+                <input type="checkbox" name="type-short" id="type-short" />
                 Short Answer
               </label>
-            </div>
-            <div class="question-type-group">
+              <div class="type-quantity" id="short-quantity-box" style="display:none;">
+                <label for="short-quantity" class="quantity-label">How many Short Answer?</label>
+                <input type="number" id="short-quantity" name="short-quantity" min="1" max="50" value="1" />
+              </div>
               <label class="checkbox-label">
-                <input type="checkbox" name="type-truefalse" />
+                <input type="checkbox" name="type-truefalse" id="type-truefalse" />
                 True / False
               </label>
-              <label class="checkbox-label">
-                <input type="checkbox" name="type-fillblank" />
-                Fill in the Blank
-              </label>
+              <div class="type-quantity" id="truefalse-quantity-box" style="display:none;">
+                <label for="truefalse-quantity" class="quantity-label">How many True/False?</label>
+                <input type="number" id="truefalse-quantity" name="truefalse-quantity" min="1" max="50" value="1" />
+              </div>
             </div>
           </div>
         </div>
@@ -161,17 +166,21 @@
       &copy; 2025 SparkQuiz &mdash; Crafted with <span aria-label="love">❤️</span> for learning.
     </footer>
   </div>
-
-  <!-- Custom Cursor Elements -->
-  <div id="custom-cursor">
-    <div class="cursor-dot"></div>
-    <div class="cursor-ring"></div>
-  </div>
   <script>
-    const cursor = document.getElementById('custom-cursor');
-    document.addEventListener('mousemove', e => {
-      cursor.style.left = `${e.clientX}px`;
-      cursor.style.top = `${e.clientY}px`;
+    // Show/hide quantity boxes for each question type
+    function toggleQuantityBox(checkboxId, boxId) {
+      document.getElementById(checkboxId).addEventListener('change', function() {
+        document.getElementById(boxId).style.display = this.checked ? 'block' : 'none';
+      });
+    }
+    toggleQuantityBox('type-mcq', 'mcq-quantity-box');
+    toggleQuantityBox('type-short', 'short-quantity-box');
+    toggleQuantityBox('type-truefalse', 'truefalse-quantity-box');
+    // On page load, show/hide based on initial state
+    window.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('mcq-quantity-box').style.display = document.getElementById('type-mcq').checked ? 'block' : 'none';
+      document.getElementById('short-quantity-box').style.display = document.getElementById('type-short').checked ? 'block' : 'none';
+      document.getElementById('truefalse-quantity-box').style.display = document.getElementById('type-truefalse').checked ? 'block' : 'none';
     });
   </script>
 </body>
