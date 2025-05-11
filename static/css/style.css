@@ -19,45 +19,6 @@
   --gap-small: 1.2rem;
 }
 
-/* Custom Cursor */
-body, * {
-  cursor: none !important;
-}
-#custom-cursor {
-  position: fixed;
-  left: 0; top: 0;
-  pointer-events: none;
-  z-index: 9999;
-  mix-blend-mode: lighten;
-}
-.cursor-dot {
-  width: 14px;
-  height: 14px;
-  background: #ff2222;
-  border-radius: 50%;
-  position: absolute;
-  left: 0; top: 0;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 8px 2px #ff2222aa;
-  transition: background 0.2s;
-}
-.cursor-ring {
-  width: 60px;
-  height: 60px;
-  border: 2.5px solid #ff2222;
-  border-radius: 50%;
-  position: absolute;
-  left: 0; top: 0;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 18px 2px #ff222233;
-  transition: width 0.18s, height 0.18s, border 0.18s;
-}
-body:active .cursor-ring {
-  width: 40px;
-  height: 40px;
-  border-width: 4px;
-}
-
 /* Layout & Typography */
 .container {
   display: grid;
@@ -267,6 +228,16 @@ input[type="checkbox"] {
   color: var(--text);
   cursor: pointer;
   user-select: none;
+}
+.type-quantity {
+  margin: 0.5em 0 1em 1.7em;
+  display: block;
+}
+.quantity-label {
+  font-size: 0.98em;
+  color: var(--accent);
+  margin-bottom: 2px;
+  font-weight: 500;
 }
 .quantity-field {
   width: 100%;
