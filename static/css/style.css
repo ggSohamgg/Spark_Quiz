@@ -115,36 +115,39 @@ a:focus-visible {
 
 .about-box {
   color: #f7fafc;
-  background: linear-gradient(90deg, #6C63FF 0%, #ff6584 100%);
-  border-radius: 24px;
+  background: rgba(44, 41, 66, 0.93); /* Soft dark with a hint of purple */
+  border-radius: 20px;
   padding: 2.2rem 2.7rem;
   margin: 2.5rem auto 2rem auto;
   text-align: center;
   font-size: 1.13rem;
   max-width: 650px;
   width: 100%;
-  box-shadow: 0 6px 32px rgba(159,122,234,0.21);
-  border: 2px solid #fff2;
-  backdrop-filter: blur(9px);
+  box-shadow: 0 6px 32px rgba(159,122,234,0.13);
+  border: 1.5px solid #4a436a;
+  backdrop-filter: blur(6px);
   font-family: var(--font-heading);
   font-weight: 700;
   letter-spacing: 0.01em;
+  transition: background 0.3s, border 0.3s;
 }
+
 .about-title {
   font-size: 1.4em;
-  color: #fff;
+  color: var(--primary);
   font-family: var(--font-heading);
   margin-bottom: 0.5em;
   letter-spacing: 0.03em;
 }
+
 .about-box a {
   display: inline-block;
   margin-top: 0.7em;
-  color: #fff;
+  color: var(--primary);
   font-weight: 700;
   text-decoration: underline;
   font-size: 1.01em;
-  border-bottom: 2px solid #fff5;
+  border-bottom: 2px solid #9f7aea44;
   transition: color 0.2s, border-color 0.2s;
 }
 .about-box a:hover {
