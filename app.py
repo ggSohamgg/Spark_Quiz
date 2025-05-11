@@ -10,12 +10,14 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL = "qwen/qwen-2.5-72b-instruct:free"
 
 def generate_quiz(parameters):
-    # Build prompt from parameters
     prompt = f"Generate a quiz with the following parameters:\n"
     prompt += f"- Topic: {parameters['topic']}\n"
     prompt += f"- Difficulty: {parameters['difficulty']}\n"
-    prompt += f"- Number of questions: {parameters['num_questions']}\n"
-    prompt += f"- Question types: {', '.join(parameters['question_types'])}\n"
+    type_lines = []
+    for t in parameters['question_types']:
+        count = parameters['type_counts'].get(t, 1)
+        type_lines.append(f"{t} ({count})")
+    prompt += f"- Question types: {', '.join(type_lines)}\n"
     if parameters.get("subtopics"):
         prompt += f"- Sub-topics: {', '.join(parameters['subtopics'])}\n"
     if parameters.get("keywords"):
@@ -83,36 +85,6 @@ def parse_quiz_text(quiz_text):
         questions.append(q)
     return questions
 
-def get_openrouter_usage():
-    url = "https://openrouter.ai/api/v1/auth/key"
-    headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}"}
-    try:
-        response = requests.get(url, headers=headers, timeout=10)
-        if response.status_code == 200:
-            data = response.json().get("data", {})
-            used = data.get("usage", 0)
-            limit = data.get("limit")
-            rate_limit = data.get("rate_limit", {})
-            per_min = rate_limit.get("requests")
-            interval = rate_limit.get("interval")
-            if limit is not None:
-                remaining = limit - used
-            else:
-                remaining = None
-            return {
-                "used": used,
-                "limit": limit,
-                "remaining": remaining,
-                "is_free_tier": data.get("is_free_tier", True),
-                "per_min": per_min,
-                "interval": interval
-            }
-        else:
-            return None
-    except Exception as e:
-        print(f"Error checking usage: {e}")
-        return None
-
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -122,14 +94,6 @@ def quiz_api():
     parameters = request.json
     quiz = generate_quiz(parameters)
     return jsonify({"quiz": quiz})
-
-@app.route("/usage")
-def usage():
-    usage_info = get_openrouter_usage()
-    if usage_info:
-        return jsonify(usage_info)
-    else:
-        return jsonify({"error": "Could not retrieve usage info"}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
