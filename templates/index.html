@@ -47,7 +47,7 @@
               </label>
               <div class="type-quantity" id="mcq-quantity-box">
                 <label for="mcq-quantity" class="quantity-label">How many Multiple Choice?</label>
-                <input type="number" id="mcq-quantity" name="mcq-quantity" min="1" max="50" value="1" class="quantity-input-custom" />
+                <input type="number" id="mcq-quantity" name="mcq-quantity" min="1" max="15" value="1" class="quantity-input-custom" />
               </div>
               <label class="checkbox-label">
                 <input type="checkbox" name="type-short" id="type-short" />
@@ -55,7 +55,7 @@
               </label>
               <div class="type-quantity" id="short-quantity-box" style="display:none;">
                 <label for="short-quantity" class="quantity-label">How many Short Answer?</label>
-                <input type="number" id="short-quantity" name="short-quantity" min="1" max="50" value="1" class="quantity-input-custom" />
+                <input type="number" id="short-quantity" name="short-quantity" min="1" max="15" value="1" class="quantity-input-custom" />
               </div>
               <label class="checkbox-label">
                 <input type="checkbox" name="type-truefalse" id="type-truefalse" />
@@ -63,7 +63,7 @@
               </label>
               <div class="type-quantity" id="truefalse-quantity-box" style="display:none;">
                 <label for="truefalse-quantity" class="quantity-label">How many True/False?</label>
-                <input type="number" id="truefalse-quantity" name="truefalse-quantity" min="1" max="50" value="1" class="quantity-input-custom" />
+                <input type="number" id="truefalse-quantity" name="truefalse-quantity" min="1" max="15" value="1" class="quantity-input-custom" />
               </div>
             </div>
           </div>
@@ -117,19 +117,12 @@
     <section class="about-box">
       <div class="about-title">About SparkQuiz</div>
       <div>
-        <strong>SparkQuiz</strong> is your AI-powered quiz generator for any subject, audience, or language.  
-        <br><br>
-        <span>
-          Powered by <b>Qwen2.5-72B-Instruct</b> via free OpenRouter (10 requests/min, 50/day).  
-          If not working, please wait until the next day.
-        </span>
-        <br><br>
-        <span>
-          SparkQuiz crafts high-quality, fact-checked quizzes tailored to your needs.  
-          Choose question types, difficulty, sub-topics, and more.  
-          Explanations are included for deeper learning and understanding.
-        </span>
-        <br><br>
+        <strong>SparkQuiz</strong> is your AI-powered quiz generator for any subject, audience, or language.<br><br>
+        Powered by <b>Qwen2.5-72B-Instruct</b> via free OpenRouter (10 requests/min, 50/day).<br>
+        If not working, please wait until the next day.<br><br>
+        SparkQuiz crafts high-quality, fact-checked quizzes tailored to your needs.<br>
+        Choose question types, difficulty, sub-topics, and more.<br>
+        Explanations are included for deeper learning and understanding.<br><br>
         <a class="about-link" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct" target="_blank" rel="noopener">
           Check the model card: Qwen2.5-72B-Instruct
         </a>
@@ -155,9 +148,19 @@
       document.getElementById('truefalse-quantity-box').style.display = document.getElementById('type-truefalse').checked ? 'block' : 'none';
     });
 
-    // FORM SUBMISSION: Send per-type quantities to Flask
+    // FORM SUBMISSION: Validate max 15 per type, then send per-type quantities to Flask
     document.getElementById('quiz-form').addEventListener('submit', function(e) {
-      e.preventDefault();
+      let mcqVal = document.getElementById('type-mcq').checked ? parseInt(document.getElementById('mcq-quantity').value || "0") : 0;
+      let shortVal = document.getElementById('type-short').checked ? parseInt(document.getElementById('short-quantity').value || "0") : 0;
+      let tfVal = document.getElementById('type-truefalse').checked ? parseInt(document.getElementById('truefalse-quantity').value || "0") : 0;
+
+      // Validation: no more than 15 for any type
+      if (mcqVal > 15 || shortVal > 15 || tfVal > 15) {
+        alert("Maximum allowed per category is 15.");
+        e.preventDefault();
+        return;
+      }
+
       const topic = document.getElementById('topic').value;
       const difficulty = document.getElementById('difficulty').value;
       const subtopics = document.getElementById('subtopics').value.split(',').map(s => s.trim()).filter(Boolean);
@@ -167,20 +170,19 @@
       const max_length = document.getElementById('max-length').value;
       const include_explanations = document.querySelector('input[name="include-explanations"]:checked').value === "yes";
 
-      // Gather checked types and their counts
       const question_types = [];
       const type_counts = {};
       if (document.getElementById('type-mcq').checked) {
         question_types.push("Multiple Choice");
-        type_counts["Multiple Choice"] = parseInt(document.getElementById('mcq-quantity').value || "1");
+        type_counts["Multiple Choice"] = mcqVal;
       }
       if (document.getElementById('type-short').checked) {
         question_types.push("Short Answer");
-        type_counts["Short Answer"] = parseInt(document.getElementById('short-quantity').value || "1");
+        type_counts["Short Answer"] = shortVal;
       }
       if (document.getElementById('type-truefalse').checked) {
         question_types.push("True/False");
-        type_counts["True/False"] = parseInt(document.getElementById('truefalse-quantity').value || "1");
+        type_counts["True/False"] = tfVal;
       }
 
       const parameters = {
