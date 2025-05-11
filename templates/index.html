@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Main font and heading/button font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <!-- Corrected path to CSS file -->
+  <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
   <div class="container">
@@ -160,5 +161,18 @@
       &copy; 2025 SparkQuiz &mdash; Crafted with <span aria-label="love">❤️</span> for learning.
     </footer>
   </div>
+
+  <!-- Custom Cursor Elements -->
+  <div id="custom-cursor">
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+  </div>
+  <script>
+    const cursor = document.getElementById('custom-cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = `${e.clientX}px`;
+      cursor.style.top = `${e.clientY}px`;
+    });
+  </script>
 </body>
 </html>
