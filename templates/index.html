@@ -2,126 +2,118 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NebulaQuiz AI Generator</title>
+    <title>SparkQuiz - AI Quiz Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="starfield"></div>
     <div class="container">
-        <h1>🌌 NebulaQuiz AI Generator</h1>
+        <h1>SparkQuiz - AI Quiz Generator</h1>
         <div id="usage-info" class="info-box"></div>
         <form id="quiz-form" autocomplete="off">
             <div class="main-fields">
-                <div class="input-group">
-                    <label for="topic">Topic</label>
-                    <input type="text" id="topic" name="topic" required placeholder="e.g., Quantum Physics">
-                </div>
-
-                <div class="input-group">
-                    <label>Difficulty</label>
-                    <div class="difficulty-group">
-                        <button type="button" class="diff-btn selected" data-value="easy">Easy</button>
-                        <button type="button" class="diff-btn" data-value="medium">Medium</button>
-                        <button type="button" class="diff-btn" data-value="hard">Hard</button>
+                <div class="row">
+                    <div class="input-group">
+                        <label for="topic">Topic</label>
+                        <input type="text" id="topic" name="topic" required placeholder="e.g., Quantum Physics">
                     </div>
-                    <input type="hidden" name="difficulty" id="difficulty_input" value="easy">
-                </div>
-
-                <div class="input-group">
-                    <label for="num_questions">Number of Questions</label>
-                    <input type="number" id="num_questions" name="num_questions" min="1" max="10" value="3">
-                </div>
-
-                <div class="input-group">
-                    <label>Desired Question Types</label>
-                    <div class="question-type-group" id="question-type-group">
-                        <button type="button" class="qt-btn selected" data-value="multiple choice">
-                            <span>📝</span> Multiple Choice
-                        </button>
-                        <button type="button" class="qt-btn" data-value="short answer">
-                            <span>✏️</span> Short Answer
-                        </button>
-                        <button type="button" class="qt-btn" data-value="true/false">
-                            <span>✅</span> True/False
-                        </button>
+                    <div class="input-group">
+                        <label for="num_questions">Number of Questions</label>
+                        <input type="number" id="num_questions" name="num_questions" min="1" max="10" value="3">
                     </div>
-                    <input type="hidden" name="question_types" id="question_types_input" value="multiple choice">
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <label for="difficulty">Difficulty</label>
+                        <select id="difficulty" name="difficulty">
+                            <option value="easy" selected>Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Desired Question Types</label>
+                        <div class="question-type-group" id="question-type-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="question_types" value="multiple choice" checked>
+                                Multiple Choice
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="question_types" value="single choice">
+                                Single Choice
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="question_types" value="yes or no">
+                                Yes or No
+                            </label>
+                        </div>
+                        <input type="hidden" name="question_types_hidden" id="question_types_input">
+                    </div>
                 </div>
             </div>
 
             <details class="advanced-options">
-                <summary>Advanced Settings ⚙️</summary>
+                <summary>Advanced Settings</summary>
                 <div class="advanced-content">
-                    <div class="input-group">
-                        <label for="subtopics">Sub-topics (comma-separated)</label>
-                        <input type="text" id="subtopics" name="subtopics" placeholder="e.g., Wave-particle duality, Quantum entanglement">
+                    <div class="row">
+                        <div class="input-group">
+                            <label for="subtopics">Sub-topics (comma-separated)</label>
+                            <input type="text" id="subtopics" name="subtopics" placeholder="e.g., Wave-particle duality, Quantum entanglement">
+                        </div>
+                        <div class="input-group">
+                            <label for="keywords">Context Keywords (comma-separated)</label>
+                            <input type="text" id="keywords" name="keywords" placeholder="e.g., experiment, theory, equation">
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label for="keywords">Context Keywords (comma-separated)</label>
-                        <input type="text" id="keywords" name="keywords" placeholder="e.g., experiment, theory, equation">
+                    <div class="row">
+                        <div class="input-group">
+                            <label for="audience">Target Audience</label>
+                            <input type="text" id="audience" name="audience" placeholder="e.g., High School Students">
+                        </div>
+                        <div class="input-group">
+                            <label for="language">Language</label>
+                            <input type="text" id="language" name="language" placeholder="e.g., en (default English)">
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label for="audience">Target Audience</label>
-                        <input type="text" id="audience" name="audience" placeholder="e.g., High School Students">
-                    </div>
-                    <div class="input-group">
-                        <label for="language">Language</label>
-                        <input type="text" id="language" name="language" placeholder="e.g., en (default English)">
-                    </div>
-                    <div class="input-group">
-                        <label for="include_explanations">Include Explanations?</label>
-                        <select id="include_explanations" name="include_explanations">
-                            <option value="yes" selected>Yes</option>
-                            <option value="no">No</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="max_length">Max Length per Question (words)</label>
-                        <input type="number" id="max_length" name="max_length" min="0" placeholder="e.g., 30">
+                    <div class="row">
+                        <div class="input-group">
+                            <label for="include_explanations">Include Explanations?</label>
+                            <select id="include_explanations" name="include_explanations">
+                                <option value="yes" selected>Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="max_length">Max Length per Question (words)</label>
+                            <input type="number" id="max_length" name="max_length" min="0" placeholder="e.g., 30">
+                        </div>
                     </div>
                 </div>
             </details>
 
-            <button type="submit" class="main-btn">Launch Quiz 🚀</button>
+            <button type="submit" class="main-btn">Generate Quiz</button>
         </form>
         <div id="quiz-output"></div>
     </div>
     <footer>
         <div class="about-box">
-            <h3>About NebulaQuiz AI</h3>
+            <h3>About SparkQuiz</h3>
             <p>
-                Powered by <b>Qwen-2.5-72B-Instruct</b> via OpenRouter.ai, NebulaQuiz creates cosmic learning experiences. 
-                Customize your journey through the stars with tailored quizzes.<br>
-                <i>For educational use. Explore the universe of knowledge!</i>
+                Powered by <b>Qwen-2.5-72B-Instruct</b> via OpenRouter.ai, SparkQuiz creates tailored quizzes for learning. 
+                Customize your quiz with ease and explore any topic.<br>
+                <i>For educational use. Spark your curiosity!</i>
             </p>
         </div>
-        <p>Made with 🌠 for learning. © 2025</p>
+        <p>Made with care for learning. © 2025</p>
     </footer>
     <script>
-        // Difficulty button group
-        const diffGroup = document.querySelector('.difficulty-group');
-        const diffInput = document.getElementById('difficulty_input');
-        diffGroup.addEventListener('click', function(e) {
-            if (e.target.closest('.diff-btn')) {
-                diffGroup.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('selected'));
-                const btn = e.target.closest('.diff-btn');
-                btn.classList.add('selected');
-                diffInput.value = btn.dataset.value;
-            }
-        });
-
-        // Question type button group
+        // Question type checkbox handling
         const qtGroup = document.getElementById('question-type-group');
         const qtInput = document.getElementById('question_types_input');
-        qtGroup.addEventListener('click', function(e) {
-            if (e.target.closest('.qt-btn')) {
-                const btn = e.target.closest('.qt-btn');
-                btn.classList.toggle('selected');
-                const selected = Array.from(qtGroup.querySelectorAll('.qt-btn.selected')).map(b => b.dataset.value);
-                qtInput.value = selected.join(',');
-            }
+        qtGroup.addEventListener('change', function() {
+            const selected = Array.from(qtGroup.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
+            qtInput.value = selected.join(',');
         });
 
         // Usage info
@@ -146,7 +138,7 @@
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
-            const question_types = formData.get('question_types').split(',').filter(Boolean);
+            const question_types = formData.get('question_types_hidden') ? formData.get('question_types_hidden').split(',').filter(Boolean) : [];
             const subtopics = formData.get('subtopics') ? formData.get('subtopics').split(',').map(s => s.trim()).filter(Boolean) : [];
             const keywords = formData.get('keywords') ? formData.get('keywords').split(',').map(s => s.trim()).filter(Boolean) : [];
             const parameters = {
@@ -161,14 +153,14 @@
                 include_explanations: formData.get('include_explanations') === "yes",
                 max_length: formData.get('max_length')
             };
-            document.getElementById('quiz-output').innerHTML = "<div class='loading'>Navigating the cosmos...</div>";
+            document.getElementById('quiz-output').innerHTML = "<div class='loading'>Generating your quiz...</div>";
             const response = await fetch('/generate_quiz', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(parameters)
             });
             const result = await response.json();
-            let html = "<h2>Your Cosmic Quiz</h2>";
+            let html = "<h2>Your SparkQuiz</h2>";
             if (result.quiz && result.quiz.length > 0) {
                 result.quiz.forEach((q, i) => {
                     html += `<div class='question-card'><b>${i+1}. ${q.question}</b><br>`;
@@ -188,22 +180,11 @@
                     html += "</div>";
                 });
             } else {
-                html += "<div class='error'>The stars couldn't align a quiz this time.</div>";
+                html += "<div class='error'>Unable to generate a quiz at this time.</div>";
             }
             document.getElementById('quiz-output').innerHTML = html;
             fetchUsage();
         };
-
-        // Starfield animation
-        const starfield = document.querySelector('.starfield');
-        for (let i = 0; i < 200; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = `${Math.random() * 100}vw`;
-            star.style.top = `${Math.random() * 100}vh`;
-            star.style.animationDuration = `${Math.random() * 3 + 2}s`;
-            starfield.appendChild(star);
-        }
     </script>
 </body>
 </html>
