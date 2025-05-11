@@ -2,179 +2,250 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AI Quiz Generator</title>
+    <title>EarthBender AI Quiz Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="parallax-bg"></div>
     <div class="container">
-        <h1>🧠 AI Quiz Generator</h1>
+        <h1>🌍 EarthBender AI Quiz Generator</h1>
         <div id="usage-info" class="info-box"></div>
         <form id="quiz-form" autocomplete="off">
             <div class="main-fields">
-                <label>Topic:</label>
-                <input type="text" name="topic" required placeholder="e.g. Quantum Physics">
-
-                <label>Difficulty:</label>
-                <div class="difficulty-group">
-                    <button type="button" class="diff-btn selected" data-value="easy">🌱 Easy</button>
-                    <button type="button" class="diff-btn" data-value="medium">🌿 Medium</button>
-                    <button type="button" class="diff-btn" data-value="hard">🌳 Hard</button>
+                <div class="input-group">
+                    <label for="topic">Topic</label>
+                    <input type="text" id="topic" name="topic" required placeholder="e.g., Quantum Physics">
                 </div>
-                <input type="hidden" name="difficulty" id="difficulty_input" value="easy">
 
-                <label>Number of Questions:</label>
-                <input type="number" name="num_questions" min="1" max="10" value="5">
-
-                <label>Question Types:</label>
-                <div class="question-type-group" id="question-type-group">
-                    <button type="button" class="qt-btn selected" data-value="multiple choice">
-                        <span>📝</span> Multiple Choice
-                    </button>
-                    <button type="button" class="qt-btn" data-value="short answer">
-                        <span>✏️</span> Short Answer
-                    </button>
-                    <button type="button" class="qt-btn" data-value="true/false">
-                        <span>✅</span> True/False
-                    </button>
+                <div class="input-group">
+                    <label>Difficulty</label>
+                    <div class="difficulty-group">
+                        <button type="button" class="diff-btn selected" data-value="easy">🌱 Easy</button>
+                        <button type="button" class="diff-btn" data-value="medium">🌿 Medium</button>
+                        <button type="button" class="diff-btn" data-value="hard">🌳 Hard</button>
+                    </div>
+                    <input type="hidden" name="difficulty" id="difficulty_input" value="easy">
                 </div>
-                <input type="hidden" name="question_types" id="question_types_input" value="multiple choice">
+
+                <div class="input-group">
+                    <label for="num_questions">Number of Questions</label>
+                    <input type="number" id="num_questions" name="num_questions" min="1" max="10" value="3">
+                </div>
+
+                <div class="input-group">
+                    <label>Desired Question Types</label>
+                    <div class="question-type-group" id="question-type-group">
+                        <button type="button" class="qt-btn selected" data-value="multiple choice">
+                            <span>📝</span> Multiple Choice
+                        </button>
+                        <button type="button" class="qt-btn" data-value="short answer">
+                            <span>✏️</span> Short Answer
+                        </button>
+                        <button type="button" class="qt-btn" data-value="true/false">
+                            <span>✅</span> True/False
+                        </button>
+                    </div>
+                    <input type="hidden" name="question_types" id="question_types_input" value="multiple choice">
+                </div>
             </div>
 
             <details class="advanced-options">
-                <summary>Advanced Options</summary>
-                <label>Specific Sub-topics (optional, comma separated):</label>
-                <input type="text" name="subtopics" placeholder="e.g. Wave-particle duality, Quantum entanglement">
-
-                <label>Context Keywords (optional, comma separated):</label>
-                <input type="text" name="keywords" placeholder="e.g. experiment, theory, equation">
-
-                <label>Target Audience (optional):</label>
-                <input type="text" name="audience" placeholder="e.g. Undergraduate Physics Students">
-
-                <label>Language (optional):</label>
-                <input type="text" name="language" placeholder="e.g. en (default English)">
-
-                <label>Include Explanations?</label>
-                <select name="include_explanations">
-                    <option value="yes" selected>Yes</option>
-                    <option value="no">No</option>
-                </select>
-
-                <label>Maximum Length per Question (optional, in words):</label>
-                <input type="number" name="max_length" min="0" placeholder="e.g. 30">
+                <summary>Advanced Settings ⚙️</summary>
+                <div class="advanced-content">
+                    <div class="input-group">
+                        <label for="subtopics">Sub-topics (comma-separated)</label>
+                        <input type="text" id="subtopics" name="subtopics" placeholder="e.g., Wave-particle duality, Quantum entanglement">
+                    </div>
+                    <div class="input-group">
+                        <label for="keywords">Context Keywords (comma-separated)</label>
+                        <input type="text" id="keywords" name="keywords" placeholder="e.g., experiment, theory, equation">
+                    </div>
+                    <div class="input-group">
+                        <label for="audience">Target Audience</label>
+                        <input type="text" id="audience" name="audience" placeholder="e.g., High School Students">
+                    </div>
+                    <div class="input-group">
+                        <label for="language">Language</label>
+                        <input type="text" id="language" name="language" placeholder="e.g., en (default English)">
+                    </div>
+                    <div class="input-group">
+                        <label for="include_explanations">Include Explanations?</label>
+                        <select id="include_explanations" name="include_explanations">
+                            <option value="yes" selected>Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="max_length">Max Length per Question (words)</label>
+                        <input type="number" id="max_length" name="max_length" min="0" placeholder="e.g., 30">
+                    </div>
+                </div>
             </details>
 
-            <button type="submit" class="main-btn">Generate Quiz</button>
+            <button type="submit" class="main-btn">Generate Quiz 🌋</button>
         </form>
         <div id="quiz-output"></div>
     </div>
     <footer>
         <div class="about-box">
-            <h3>About this App</h3>
+            <h3>About EarthBender AI</h3>
             <p>
-                This AI Quiz Generator uses the <b>Qwen-2.5-72B-Instruct</b> model via OpenRouter.ai.<br>
-                It can generate quizzes on any topic, with customizable difficulty, question types, sub-topics, and more.<br>
-                <i>Powered by open-source LLMs & OpenRouter API. For educational use only!</i>
+                Powered by <b>Qwen-2.5-72B-Instruct</b> via OpenRouter.ai, this quiz generator crafts immersive learning experiences. 
+                Customize topics, difficulty, and question types to master any subject.<br>
+                <i>For educational use. Unleash your inner earthbender!</i>
             </p>
         </div>
-        <p>Made with ❤️ for learning. &copy; 2025</p>
+        <p>Made with 🌍 for learning. © 2025</p>
     </footer>
+    <canvas id="particle-canvas"></canvas>
     <script>
-    // Difficulty button group
-    const diffGroup = document.querySelector('.difficulty-group');
-    const diffInput = document.getElementById('difficulty_input');
-    diffGroup.addEventListener('click', function(e) {
-        if (e.target.closest('.diff-btn')) {
-            diffGroup.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('selected'));
-            const btn = e.target.closest('.diff-btn');
-            btn.classList.add('selected');
-            diffInput.value = btn.dataset.value;
-        }
-    });
-
-    // Question type button group
-    const qtGroup = document.getElementById('question-type-group');
-    const qtInput = document.getElementById('question_types_input');
-    qtGroup.addEventListener('click', function(e) {
-        if (e.target.closest('.qt-btn')) {
-            const btn = e.target.closest('.qt-btn');
-            btn.classList.toggle('selected');
-            const selected = Array.from(qtGroup.querySelectorAll('.qt-btn.selected')).map(b => b.dataset.value);
-            qtInput.value = selected.join(',');
-        }
-    });
-
-    // Usage info
-    async function fetchUsage() {
-        const resp = await fetch('/usage');
-        const data = await resp.json();
-        if (data.error) {
-            document.getElementById('usage-info').innerText = "Usage info unavailable";
-        } else if (data.limit !== null && data.remaining !== null) {
-            document.getElementById('usage-info').innerText =
-                `OpenRouter API requests left today: ${data.remaining} of ${data.limit}`;
-        } else if (data.per_min && data.interval) {
-            document.getElementById('usage-info').innerText =
-                `OpenRouter Free Tier: Up to ${data.per_min} requests per ${data.interval}.`;
-        } else {
-            document.getElementById('usage-info').innerText = "Usage info unavailable";
-        }
-    }
-    fetchUsage();
-
-    // Form submission
-    document.getElementById('quiz-form').onsubmit = async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        const question_types = formData.get('question_types').split(',').filter(Boolean);
-        const subtopics = formData.get('subtopics') ? formData.get('subtopics').split(',').map(s => s.trim()).filter(Boolean) : [];
-        const keywords = formData.get('keywords') ? formData.get('keywords').split(',').map(s => s.trim()).filter(Boolean) : [];
-        const parameters = {
-            topic: formData.get('topic'),
-            difficulty: formData.get('difficulty'),
-            num_questions: formData.get('num_questions'),
-            question_types: question_types,
-            subtopics: subtopics,
-            keywords: keywords,
-            audience: formData.get('audience'),
-            language: formData.get('language') || "en",
-            include_explanations: formData.get('include_explanations') === "yes",
-            max_length: formData.get('max_length')
-        };
-        document.getElementById('quiz-output').innerHTML = "<div class='loading'>Generating quiz...</div>";
-        const response = await fetch('/generate_quiz', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(parameters)
+        // Difficulty button group
+        const diffGroup = document.querySelector('.difficulty-group');
+        const diffInput = document.getElementById('difficulty_input');
+        diffGroup.addEventListener('click', function(e) {
+            if (e.target.closest('.diff-btn')) {
+                diffGroup.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('selected'));
+                const btn = e.target.closest('.diff-btn');
+                btn.classList.add('selected');
+                diffInput.value = btn.dataset.value;
+            }
         });
-        const result = await response.json();
-        let html = "<h2>Your Quiz</h2>";
-        if (result.quiz && result.quiz.length > 0) {
-            result.quiz.forEach((q, i) => {
-                html += `<div class='question-card'><b>${i+1}. ${q.question}</b><br>`;
-                if (q.options && q.options.length > 0) {
-                    html += "<ul>";
-                    q.options.forEach(opt => {
-                        html += `<li>${opt}</li>`;
-                    });
-                    html += "</ul>";
-                }
-                if (q.answer) {
-                    html += `<div class='answer'><b>Answer:</b> ${q.answer}</div>`;
-                }
-                if (q.explanation) {
-                    html += `<div class='explanation'><i>${q.explanation}</i></div>`;
-                }
-                html += "</div>";
-            });
-        } else {
-            html += "<div class='error'>Sorry, no quiz could be generated.</div>";
+
+        // Question type button group
+        const qtGroup = document.getElementById('question-type-group');
+        const qtInput = document.getElementById('question_types_input');
+        qtGroup.addEventListener('click', function(e) {
+            if (e.target.closest('.qt-btn')) {
+                const btn = e.target.closest('.qt-btn');
+                btn.classList.toggle('selected');
+                const selected = Array.from(qtGroup.querySelectorAll('.qt-btn.selected')).map(b => b.dataset.value);
+                qtInput.value = selected.join(',');
+            }
+        });
+
+        // Usage info
+        async function fetchUsage() {
+            const resp = await fetch('/usage');
+            const data = await resp.json();
+            const infoBox = document.getElementById('usage-info');
+            if (data.error) {
+                infoBox.innerText = "Usage info unavailable";
+            } else if (data.limit !== null && data.remaining !== null) {
+                infoBox.innerText = `OpenRouter API requests left today: ${data.remaining} of ${data.limit}`;
+            } else if (data.per_min && data.interval) {
+                infoBox.innerText = `OpenRouter Free Tier: Up to ${data.per_min} requests per ${data.interval}.`;
+            } else {
+                infoBox.innerText = "Usage info unavailable";
+            }
         }
-        document.getElementById('quiz-output').innerHTML = html;
         fetchUsage();
-    }
+
+        // Form submission
+        document.getElementById('quiz-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const question_types = formData.get('question_types').split(',').filter(Boolean);
+            const subtopics = formData.get('subtopics') ? formData.get('subtopics').split(',').map(s => s.trim()).filter(Boolean) : [];
+            const keywords = formData.get('keywords') ? formData.get('keywords').split(',').map(s => s.trim()).filter(Boolean) : [];
+            const parameters = {
+                topic: formData.get('topic'),
+                difficulty: formData.get('difficulty'),
+                num_questions: formData.get('num_questions'),
+                question_types: question_types,
+                subtopics: subtopics,
+                keywords: keywords,
+                audience: formData.get('audience'),
+                language: formData.get('language') || "en",
+                include_explanations: formData.get('include_explanations') === "yes",
+                max_length: formData.get('max_length')
+            };
+            document.getElementById('quiz-output').innerHTML = "<div class='loading'>Forging your quiz...</div>";
+            const response = await fetch('/generate_quiz', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(parameters)
+            });
+            const result = await response.json();
+            let html = "<h2>Your EarthBender Quiz</h2>";
+            if (result.quiz && result.quiz.length > 0) {
+                result.quiz.forEach((q, i) => {
+                    html += `<div class='question-card'><b>${i+1}. ${q.question}</b><br>`;
+                    if (q.options && q.options.length > 0) {
+                        html += "<ul>";
+                        q.options.forEach(opt => {
+                            html += `<li>${opt}</li>`;
+                        });
+                        html += "</ul>";
+                    }
+                    if (q.answer) {
+                        html += `<div class='answer'><b>Answer:</b> ${q.answer}</div>`;
+                    }
+                    if (q.explanation) {
+                        html += `<div class='explanation'><i>${q.explanation}</i></div>`;
+                    }
+                    html += "</div>";
+                });
+            } else {
+                html += "<div class='error'>The earth could not yield a quiz this time.</div>";
+            }
+            document.getElementById('quiz-output').innerHTML = html;
+            fetchUsage();
+        };
+
+        // Particle effect for earth-bending vibe
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const particles = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.size > 0.2) this.size -= 0.01;
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(107, 142, 35, 0.5)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        function initParticles() {
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle());
+            }
+        }
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if (p.size <= 0.2) {
+                    particles.splice(i, 1);
+                    particles.push(new Particle());
+                }
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        initParticles();
+        animateParticles();
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
 </html>
