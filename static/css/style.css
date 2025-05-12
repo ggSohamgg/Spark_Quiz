@@ -420,8 +420,33 @@ input[type="number"].quantity-input-custom[type="number"] {
   min-height: 320px;
   overflow-y: auto;
   line-height: 1.6;
-  white-space: pre-wrap;
   box-sizing: border-box;
+}
+
+/* Loading Animation */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--primary);
+  font-size: 1.2rem;
+  margin-top: 20px;
+}
+.spinner {
+افق
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--primary);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Quiz Output & Cards (legacy, not used with textarea, but keep for future) */
@@ -457,12 +482,6 @@ input[type="number"].quantity-input-custom[type="number"] {
   margin-top: 5px;
   font-size: 0.95em;
   font-style: italic;
-}
-.loading {
-  text-align: center;
-  color: var(--primary);
-  font-size: 1.2rem;
-  margin-top: 20px;
 }
 .error {
   color: var(--accent);
