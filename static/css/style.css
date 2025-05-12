@@ -105,13 +105,13 @@ header {
   border-radius: 3px;
   background: linear-gradient(90deg, #ff6584 0%, #9f7aea 100%);
   opacity: 0.75;
-  animation: spark-underline-anim 2s infinite alternate;
+  animation: spark-underline-anim 4s infinite alternate;
   z-index: -1;
 }
 
 @keyframes spark-underline-anim {
-  0% { width: 60%; opacity: 0.75; }
-  100% { width: 72%; opacity: 1; }
+  0% { width: 20%; opacity: 0.75; }
+  100% { width: 40%; opacity: 1; }
 }
 
 /* Info and About Box */
