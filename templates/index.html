@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/lib/marked.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -137,6 +136,54 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Inline Markdown parser
+      function parseMarkdown(text) {
+        const lines = text.split('\n');
+        let html = '';
+        let inList = false;
+
+        for (let line of lines) {
+          line = line.trim();
+
+          // Headings
+          if (line.startsWith('# ')) {
+            html += `<h1>${line.slice(2)}</h1>`;
+          } else if (line.startsWith('## ')) {
+            html += `<h2>${line.slice(3)}</h2>`;
+          }
+          // Bold text (e.g., **Explanation:**)
+          else if (line.match(/\*\*.*\*\*/)) {
+            const boldText = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html += `<p>${boldText}</p>`;
+          }
+          // Unordered lists (e.g., - A) Option)
+          else if (line.startsWith('- ')) {
+            if (!inList) {
+              html += '<ul>';
+              inList = true;
+            }
+            html += `<li>${line.slice(2)}</li>`;
+          }
+          // Close list if no longer in list item
+          else if (inList && line !== '') {
+            html += '</ul>';
+            inList = false;
+            html += `<p>${line}</p>`;
+          }
+          // Plain text or empty lines
+          else if (line !== '') {
+            html += `<p>${line}</p>`;
+          }
+        }
+
+        // Close any open list
+        if (inList) {
+          html += '</ul>';
+        }
+
+        return html;
+      }
+
       // Show/hide quantity boxes for each question type
       function toggleQuantityBox(checkboxId, boxId) {
         const checkbox = document.getElementById(checkboxId);
@@ -244,7 +291,7 @@
             const quizOutput = document.createElement('div');
             quizOutput.id = 'quiz-output';
             quizOutput.setAttribute('aria-live', 'polite');
-            quizOutput.innerHTML = window.marked.parse(data.quiz_text);
+            quizOutput.innerHTML = parseMarkdown(data.quiz_text);
             quizForm.insertAdjacentElement('afterend', quizOutput);
           } else {
             throw new Error('No quiz generated.');
