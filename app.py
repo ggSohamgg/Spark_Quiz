@@ -11,7 +11,7 @@ MODEL = "qwen/qwen3-30b-a3b:free"
 def generate_quiz(parameters):
     """
     Build the prompt from user parameters, send to OpenRouter API,
-    and return the raw response text from the model.
+    and return the raw response text from the model in Markdown format.
     """
     # Validate that at least one question is requested
     total_questions = sum(parameters['type_counts'].get(t, 0) for t in parameters['question_types'])
@@ -46,11 +46,11 @@ def generate_quiz(parameters):
     if parameters.get("max_length"):
         prompt += f"- Maximum length per question: {parameters['max_length']} words\n"
     prompt += (
-        "Please format the quiz as follows:\n"
-        "1. Start with a heading like ### Topic Quiz\n"
-        "2. For each question, use a subheading like #### Question X: Type (e.g., #### Question 1: Multiple Choice)\n"
+        "Please format the quiz in Markdown as follows:\n"
+        "1. Start with a heading like # Topic Quiz\n"
+        "2. For each question, use a subheading like ## Question X: Type (e.g., ## Question 1: Multiple Choice)\n"
         "3. For multiple choice questions, label options as A), B), C), D)\n"
-        "4. If explanations are requested, include them after each question\n"
+        "4. If explanations are requested, include them after each question in a paragraph starting with **Explanation:**\n"
         "5. Make sure all information is factually correct\n"
         "6. Ensure each question's answer matches its explanation, and place the explanation after the answer.\n"
     )
@@ -66,7 +66,7 @@ def generate_quiz(parameters):
         ]
     }
     try:
-        # Timeout set to 25 seconds to fail before Gunicorn's 60-second timeout
+        # Timeout set to 300 seconds to fail before Gunicorn's 300-second timeout
         response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=300)
         response.raise_for_status()
         data = response.json()
@@ -82,7 +82,7 @@ def generate_quiz(parameters):
             "quiz_text": quiz_text
         }
     except requests.exceptions.Timeout:
-        print("Error: OpenRouter API request timed out after 25 seconds.")
+        print("Error: OpenRouter API request timed out after 300 seconds.")
         return {
             "quiz_text": "Error: API request timed out.\n\nThe request to the OpenRouter API timed out after 25 seconds. This might be due to network issues or the API being slow to respond. Please try again later."
         }
