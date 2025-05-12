@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/lib/marked.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -111,9 +112,10 @@
         <button type="submit" class="main-btn">Generate Quiz</button>
       </div>
     </form>
-    <!-- Output as a div with plain text -->
-    <div id="quiz-output" aria-live="polite"></div>
-    <div class="loading" style="display:none;">Generating your quiz...</div>
+    <div class="loading" style="display:none;">
+      <div class="spinner"></div>
+      Generating your quiz...
+    </div>
     <div class="error" style="display:none;"></div>
     <section class="about-box">
       <div class="about-title">About SparkQuiz</div>
@@ -121,7 +123,7 @@
         <strong>SparkQuiz</strong> is your AI-powered quiz generator for any subject, audience, or language.<br><br>
         Powered by <b>Qwen3 30B A3B</b> via free OpenRouter (10 requests/min, 50/day).<br>
         If not working, please wait until the next day.<br><br>
-        SparkQuiz crafts high-quality, fact-checked quizzes tailored to your needs.<br>
+        SparkQuiz crafts high-quality, accurate quizzes tailored to your needs.<br>
         Choose question types, difficulty, sub-topics, and more.<br>
         Explanations are included for deeper learning and understanding.<br><br>
         <a class="about-link" href="https://huggingface.co/Qwen/Qwen3-30B-A3B" target="_blank" rel="noopener">
@@ -220,7 +222,7 @@
       // Show loading state
       document.querySelector('.loading').style.display = 'block';
       document.querySelector('.error').style.display = 'none';
-      document.getElementById('quiz-output').textContent = '';
+      //  document.getElementById('quiz-output')?.remove();
 
       // Send request to backend
       fetch('/generate_quiz', {
@@ -229,7 +231,6 @@
         body: JSON.stringify(parameters)
       })
       .then(res => {
-        // Check if the response is OK
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
@@ -238,17 +239,20 @@
       .then(data => {
         document.querySelector('.loading').style.display = 'none';
         if (data.quiz_text) {
-          // Display the raw quiz text directly
-          document.getElementById('quiz-output').textContent = data.quiz_text;
+          // Create quiz output div dynamically
+          const quizOutput = document.createElement('div');
+          quizOutput.id = 'quiz-output';
+          quizOutput.setAttribute('aria-live', 'polite');
+          quizOutput.innerHTML = marked.parse(data.quiz_text);
+          quizForm.insertAdjacentElement('afterend', quizOutput);
         } else {
-          document.getElementById('quiz-output').textContent = 'Error: No quiz generated.';
+          throw new Error('No quiz generated.');
         }
       })
       .catch(err => {
         document.querySelector('.loading').style.display = 'none';
         document.querySelector('.error').style.display = 'block';
         document.querySelector('.error').textContent = "An error occurred: " + err.message;
-        document.getElementById('quiz-output').textContent = `Error: An error occurred while generating the quiz.\n\n${err.message}`;
       });
     });
   </script>
