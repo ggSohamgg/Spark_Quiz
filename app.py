@@ -49,10 +49,11 @@ def generate_quiz(parameters):
         "Please format the quiz in Markdown as follows:\n"
         "1. Start with a heading like # Topic Quiz\n"
         "2. For each question, use a subheading like ## Question X: Type (e.g., ## Question 1: Multiple Choice)\n"
-        "3. For multiple choice questions, label options as A), B), C), D)\n"
-        "4. If explanations are requested, include them after each question in a paragraph starting with **Explanation:**\n"
-        "5. Make sure all information is factually correct\n"
-        "6. Ensure each question's answer matches its explanation, and place the explanation after the answer.\n"
+        "3. For multiple choice questions, label options as - A), - B), - C), - D)\n"
+        "4. For other question types (e.g., Short Answer, True/False, or custom types like Fill-in-the-blank), present the question clearly and provide the answer format expected (e.g., for Short Answer, provide a brief sentence; for True/False, state True or False; for custom types, follow a similar clear format).\n"
+        "5. If explanations are requested, include them after each question in a paragraph starting with **Explanation:**\n"
+        "6. Make sure all information is factually correct\n"
+        "7. Ensure each question's answer matches its explanation, and place the explanation after the answer.\n"
     )
 
     headers = {
@@ -66,8 +67,8 @@ def generate_quiz(parameters):
         ]
     }
     try:
-        # Timeout set to 300 seconds to fail before Gunicorn's 300-second timeout
-        response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=300)
+        # Timeout set to 25 seconds to fail before Gunicorn's 60-second timeout
+        response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=25)
         response.raise_for_status()
         data = response.json()
         quiz_text = data["choices"][0]["message"]["content"]
@@ -82,34 +83,25 @@ def generate_quiz(parameters):
             "quiz_text": quiz_text
         }
     except requests.exceptions.Timeout:
-        print("Error: OpenRouter API request timed out after 300 seconds.")
+        print("Error: OpenRouter API request timed out after 25 seconds.")
         return {
             "quiz_text": "Error: API request timed out.\n\nThe request to the OpenRouter API timed out after 25 seconds. This might be due to network issues or the API being slow to respond. Please try again later."
         }
     except requests.exceptions.RequestException as e:
-        print(f"Error from OpenRouter API: {e}")
+        print(f"Error: OpenRouter API request failed: {str(e)}")
         return {
-            "quiz_text": f"Error: Failed to generate quiz.\n\nAPI request failed: {str(e)}. This might be due to rate limits (10 requests/min, 50/day) or an invalid API key."
+            "quiz_text": f"Error: API request failed.\n\nThe request to the OpenRouter API failed: {str(e)}. Please check your network connection or try again later."
         }
 
-@app.route("/")
+@app.route('/')
 def index():
-    """Render the main SparkQuiz HTML page."""
-    return render_template("index.html")
+    return render_template('index.html')
 
-@app.route("/generate_quiz", methods=["POST"])
-def quiz_api():
-    """Receive quiz parameters from the frontend, generate the quiz, and return as JSON."""
-    try:
-        parameters = request.json
-        result = generate_quiz(parameters)
-        return jsonify(result)
-    except Exception as e:
-        print(f"Error in quiz_api: {str(e)}")
-        return jsonify({
-            "quiz_text": f"Error: Server error occurred.\n\nAn unexpected error occurred on the server: {str(e)}"
-        }), 500
+@app.route('/generate_quiz', methods=['POST'])
+def generate_quiz_endpoint():
+    parameters = request.get_json()
+    result = generate_quiz(parameters)
+    return jsonify(result)
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    app.run(host="0.0.0.0", port=port)
+if __name__ == '__main__':
+    app.run(debug=True)
