@@ -123,7 +123,7 @@
         <strong>SparkQuiz</strong> is your AI-powered quiz generator for any subject, audience, or language.<br><br>
         Powered by <b>Qwen3 30B A3B</b> via free OpenRouter (10 requests/min, 50/day).<br>
         If not working, please wait until the next day.<br><br>
-        SparkQuiz crafts high-quality, accurate quizzes tailored to your needs.<br>
+        SparkQuiz crafts high-quality, fact-checked quizzes tailored to your needs.<br>
         Choose question types, difficulty, sub-topics, and more.<br>
         Explanations are included for deeper learning and understanding.<br><br>
         <a class="about-link" href="https://huggingface.co/Qwen/Qwen3-30B-A3B" target="_blank" rel="noopener">
@@ -136,125 +136,128 @@
     </footer>
   </div>
   <script>
-    // Show/hide quantity boxes for each question type
-    function toggleQuantityBox(checkboxId, boxId) {
-      const checkbox = document.getElementById(checkboxId);
-      const box = document.getElementById(boxId);
-      checkbox.addEventListener('change', function() {
-        box.style.display = this.checked ? 'block' : 'none';
-      });
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+      // Show/hide quantity boxes for each question type
+      function toggleQuantityBox(checkboxId, boxId) {
+        const checkbox = document.getElementById(checkboxId);
+        const box = document.getElementById(boxId);
+        checkbox.addEventListener('change', function() {
+          box.style.display = this.checked ? 'block' : 'none';
+        });
+      }
 
-    // Initialize quantity box visibility on page load
-    toggleQuantityBox('type-mcq', 'mcq-quantity-box');
-    toggleQuantityBox('type-short', 'short-quantity-box');
-    toggleQuantityBox('type-truefalse', 'truefalse-quantity-box');
+      // Initialize quantity box visibility
+      toggleQuantityBox('type-mcq', 'mcq-quantity-box');
+      toggleQuantityBox('type-short', 'short-quantity-box');
+      toggleQuantityBox('type-truefalse', 'truefalse-quantity-box');
 
-    window.addEventListener('DOMContentLoaded', function() {
       document.getElementById('mcq-quantity-box').style.display = document.getElementById('type-mcq').checked ? 'block' : 'none';
       document.getElementById('short-quantity-box').style.display = document.getElementById('type-short').checked ? 'block' : 'none';
       document.getElementById('truefalse-quantity-box').style.display = document.getElementById('type-truefalse').checked ? 'block' : 'none';
-    });
 
-    // FORM SUBMISSION: Validate and send data to Flask
-    const quizForm = document.getElementById('quiz-form');
-    quizForm.addEventListener('submit', function(e) {
-      e.preventDefault(); // Prevent default form submission to stop page reload
+      // FORM SUBMISSION: Validate and send data to Flask
+      const quizForm = document.getElementById('quiz-form');
+      quizForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
 
-      // Get values for question types and quantities
-      let mcqVal = document.getElementById('type-mcq').checked ? parseInt(document.getElementById('mcq-quantity').value || "0") : 0;
-      let shortVal = document.getElementById('type-short').checked ? parseInt(document.getElementById('short-quantity').value || "0") : 0;
-      let tfVal = document.getElementById('type-truefalse').checked ? parseInt(document.getElementById('truefalse-quantity').value || "0") : 0;
+        // Get values for question types and quantities
+        let mcqVal = document.getElementById('type-mcq').checked ? parseInt(document.getElementById('mcq-quantity').value || "0") : 0;
+        let shortVal = document.getElementById('type-short').checked ? parseInt(document.getElementById('short-quantity').value || "0") : 0;
+        let tfVal = document.getElementById('type-truefalse').checked ? parseInt(document.getElementById('truefalse-quantity').value || "0") : 0;
 
-      // Validation: no more than 15 for any type
-      if (mcqVal > 15 || shortVal > 15 || tfVal > 15) {
-        alert("Maximum allowed per category is 15.");
-        return; // Stop submission if validation fails
-      }
-
-      // Validate that at least one question is requested
-      const totalQuestions = mcqVal + shortVal + tfVal;
-      if (totalQuestions <= 0) {
-        document.querySelector('.loading').style.display = 'none';
-        document.querySelector('.error').style.display = 'block';
-        document.querySelector('.error').textContent = "Error: Please request at least one question.";
-        return;
-      }
-
-      // Gather form data
-      const topic = document.getElementById('topic').value;
-      const difficulty = document.getElementById('difficulty').value;
-      const subtopics = document.getElementById('subtopics').value.split(',').map(s => s.trim()).filter(Boolean);
-      const keywords = document.getElementById('context').value.split(',').map(s => s.trim()).filter(Boolean);
-      const audience = document.getElementById('audience').value;
-      const language = document.getElementById('language').value || "en";
-      const max_length = document.getElementById('max-length').value;
-      const include_explanations = document.querySelector('input[name="include-explanations"]:checked').value === "yes";
-
-      const question_types = [];
-      const type_counts = {};
-      if (document.getElementById('type-mcq').checked) {
-        question_types.push("Multiple Choice");
-        type_counts["Multiple Choice"] = mcqVal;
-      }
-      if (document.getElementById('type-short').checked) {
-        question_types.push("Short Answer");
-        type_counts["Short Answer"] = shortVal;
-      }
-      if (document.getElementById('type-truefalse').checked) {
-        question_types.push("True/False");
-        type_counts["True/False"] = tfVal;
-      }
-
-      const parameters = {
-        topic,
-        difficulty,
-        subtopics,
-        keywords,
-        audience,
-        language,
-        max_length,
-        include_explanations,
-        question_types,
-        type_counts
-      };
-
-      // Show loading state
-      document.querySelector('.loading').style.display = 'block';
-      document.querySelector('.error').style.display = 'none';
-      //  document.getElementById('quiz-output')?.remove();
-
-      // Send request to backend
-      fetch('/generate_quiz', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(parameters)
-      })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+        // Validation: no more than 15 for any type
+        if (mcqVal > 15 || shortVal > 15 || tfVal > 15) {
+          alert("Maximum allowed per category is 15.");
+          return; // Stop submission if validation fails
         }
-        return res.json();
-      })
-      .then(data => {
-        document.querySelector('.loading').style.display = 'none';
-        if (data.quiz_text) {
-          // Create quiz output div dynamically
-          const quizOutput = document.createElement('div');
-          quizOutput.id = 'quiz-output';
-          quizOutput.setAttribute('aria-live', 'polite');
-          quizOutput.innerHTML = marked.parse(data.quiz_text);
-          quizForm.insertAdjacentElement('afterend', quizOutput);
-        } else {
-          throw new Error('No quiz generated.');
+
+        // Validate that at least one question is requested
+        const totalQuestions = mcqVal + shortVal + tfVal;
+        if (totalQuestions <= 0) {
+          document.querySelector('.loading').style.display = 'none';
+          document.querySelector('.error').style.display = 'block';
+          document.querySelector('.error').textContent = "Error: Please request at least one question.";
+          return;
         }
-      })
-      .catch(err => {
-        document.querySelector('.loading').style.display = 'none';
-        document.querySelector('.error').style.display = 'block';
-        document.querySelector('.error').textContent = "An error occurred: " + err.message;
+
+        // Gather form data
+        const topic = document.getElementById('topic').value;
+        const difficulty = document.getElementById('difficulty').value;
+        const subtopics = document.getElementById('subtopics').value.split(',').map(s => s.trim()).filter(Boolean);
+        const keywords = document.getElementById('context').value.split(',').map(s => s.trim()).filter(Boolean);
+        const audience = document.getElementById('audience').value;
+        const language = document.getElementById('language').value || "en";
+        const max_length = document.getElementById('max-length').value;
+        const include_explanations = document.querySelector('input[name="include-explanations"]:checked').value === "yes";
+
+        const question_types = [];
+        const type_counts = {};
+        if (document.getElementById('type-mcq').checked) {
+          question_types.push("Multiple Choice");
+          type_counts["Multiple Choice"] = mcqVal;
+        }
+        if (document.getElementById('type-short').checked) {
+          question_types.push("Short Answer");
+          type_counts["Short Answer"] = shortVal;
+        }
+        if (document.getElementById('type-truefalse').checked) {
+          question_types.push("True/False");
+          type_counts["True/False"] = tfVal;
+        }
+
+        const parameters = {
+          topic,
+          difficulty,
+          subtopics,
+          keywords,
+          audience,
+          language,
+          max_length,
+          include_explanations,
+          question_types,
+          type_counts
+        };
+
+        // Show loading state
+        document.querySelector('.loading').style.display = 'block';
+        document.querySelector('.error').style.display = 'none';
+        // Remove existing quiz output if present
+        const existingOutput = document.getElementById('quiz-output');
+        if (existingOutput) existingOutput.remove();
+
+        // Send request to backend
+        fetch('/generate_quiz', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(parameters)
+        })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          document.querySelector('.loading').style.display = 'none';
+          if (data.quiz_text) {
+            // Create quiz output div dynamically
+            const quizOutput = document.createElement('div');
+            quizOutput.id = 'quiz-output';
+            quizOutput.setAttribute('aria-live', 'polite');
+            quizOutput.innerHTML = window.marked.parse(data.quiz_text);
+            quizForm.insertAdjacentElement('afterend', quizOutput);
+          } else {
+            throw new Error('No quiz generated.');
+          }
+        })
+        .catch(err => {
+          document.querySelector('.loading').style.display = 'none';
+          document.querySelector('.error').style.display = 'block';
+          document.querySelector('.error').textContent = "An error occurred: " + err.message;
+        });
       });
     });
   </script>
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93e7959ecdefe590',t:'MTc0NzAyODQ1OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
