@@ -7,7 +7,7 @@
 ## ✨ Features
 
 - **Generate quizzes** on any topic with customizable **difficulty levels** (easy, medium, hard).
-- Choose from **predefined question types** (Multiple Choice, Short Answer, True/False) or add up to 10 **custom types** (e.g., Fill-in-the-blank, Essay).
+- Choose from **predefined question types** (Multiple Choice, Short Answer, True/False) or add **custom types** (e.g., Fill-in-the-blank, Essay).
 - Advanced options for **sub-topics**, **audience**, **language**, and **maximum question length**.
 - Option to include **explanations** for deeper learning.
 - **Modern, responsive UI** with glassmorphism design and animated effects.
