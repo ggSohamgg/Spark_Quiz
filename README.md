@@ -1,6 +1,6 @@
 # 🌟 SparkQuiz
 
-**SparkQuiz** is an AI-powered web application that generates custom quizzes on any subject, tailored to your preferences. Built with **Flask** and styled with modern **CSS**, it leverages a large language model (LLM) to create high-quality, fact-checked quizzes with options for question types, difficulty levels, sub-topics, and more.
+**SparkQuiz** is an AI-powered web application that generates custom quizzes on any subject, tailored to your preferences. Built with **Flask** and styled with modern **CSS**, it leverages a large language model (LLM) to create high-quality, accurate quizzes with options for question types, difficulty levels, sub-topics, and more.
 
 ---
 
