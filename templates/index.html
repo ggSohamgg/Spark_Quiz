@@ -220,6 +220,15 @@
         // Get custom types from input
         const customTypes = customTypesInput.value.split(',').map(type => type.trim()).filter(type => type);
 
+        // Check if the number of custom types exceeds 10
+        if (customTypes.length > 10) {
+          document.querySelector('.error').style.display = 'block';
+          document.querySelector('.error').textContent = "Error: Maximum 10 custom question types allowed.";
+          return; // Stop further processing
+        } else {
+          document.querySelector('.error').style.display = 'none';
+        }
+
         // Create checkbox and quantity input for each custom type
         customTypes.forEach((type, index) => {
           const typeId = `type-custom-${index}`;
@@ -241,7 +250,7 @@
           quantityDiv.style.display = 'none';
           quantityDiv.innerHTML = `
             <label for="custom-quantity-${index}" class="quantity-label">How many ${type}?</label>
-            <input type="number" id="custom-quantity-${index}" name="custom-quantity-${index}" min="1" max="15" value="1" class="quantity-input-custom" />
+            <input type="number" id="custom-quantity-${index}" name="custom-quantity-${index}" min="1" max="10" value="1" class="quantity-input-custom" />
           `;
           questionTypeGroup.appendChild(quantityDiv);
 
@@ -268,9 +277,10 @@
           return checkbox && checkbox.checked && quantityInput ? parseInt(quantityInput.value || "0") : 0;
         });
 
-        // Validation: no more than 15 for any type
-        if (mcqVal > 15 || shortVal > 15 || tfVal > 15 || customVals.some(val => val > 15)) {
-          alert("Maximum allowed per category is 15.");
+        // Validation: no more than 10 for any type
+        if (mcqVal > 10 || shortVal > 10 || tfVal > 10 || customVals.some(val => val > 10)) {
+          document.querySelector('.error').style.display = 'block';
+          document.querySelector('.error').textContent = "Error: Maximum allowed per category is 10.";
           return; // Stop submission if validation fails
         }
 
