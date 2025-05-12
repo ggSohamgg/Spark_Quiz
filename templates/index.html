@@ -38,9 +38,9 @@
       </div>
       <div class="row">
         <div class="question-types-container">
-          <span style="font-weight:500; margin-bottom:8px;">Desired Question Types <span class="field-desc">(select one or more)</span></span>
+          <span style="font-weight:500; margin-bottom:8px;">Desired Question Types <span class="field-desc">(select one or more, e.g., "multiple choice", "short answer", "true/false")</span></span>
           <div class="question-types-row">
-            <div class="question-type-group">
+            <div class="question-type-group" id="question-type-group">
               <label class="checkbox-label">
                 <input type="checkbox" name="type-mcq" id="type-mcq" checked />
                 Multiple Choice
@@ -66,6 +66,10 @@
                 <input type="number" id="truefalse-quantity" name="truefalse-quantity" min="1" max="15" value="1" class="quantity-input-custom" />
               </div>
             </div>
+          </div>
+          <div class="input-group custom-question-types">
+            <label for="custom-types">Custom Question Types <span class="field-desc">(Optional, comma separated, e.g., "Fill-in-the-blank, Essay")</span></label>
+            <input type="text" id="custom-types" name="custom-types" placeholder="e.g. Fill-in-the-blank, Essay" />
           </div>
         </div>
       </div>
@@ -188,12 +192,14 @@
       function toggleQuantityBox(checkboxId, boxId) {
         const checkbox = document.getElementById(checkboxId);
         const box = document.getElementById(boxId);
-        checkbox.addEventListener('change', function() {
-          box.style.display = this.checked ? 'block' : 'none';
-        });
+        if (checkbox && box) {
+          checkbox.addEventListener('change', function() {
+            box.style.display = this.checked ? 'block' : 'none';
+          });
+        }
       }
 
-      // Initialize quantity box visibility
+      // Initialize quantity box visibility for predefined types
       toggleQuantityBox('type-mcq', 'mcq-quantity-box');
       toggleQuantityBox('type-short', 'short-quantity-box');
       toggleQuantityBox('type-truefalse', 'truefalse-quantity-box');
@@ -202,24 +208,74 @@
       document.getElementById('short-quantity-box').style.display = document.getElementById('type-short').checked ? 'block' : 'none';
       document.getElementById('truefalse-quantity-box').style.display = document.getElementById('type-truefalse').checked ? 'block' : 'none';
 
+      // Handle custom question types
+      const customTypesInput = document.getElementById('custom-types');
+      const questionTypeGroup = document.getElementById('question-type-group');
+
+      customTypesInput.addEventListener('input', function() {
+        // Remove existing custom type elements
+        const existingCustomElements = document.querySelectorAll('.custom-type');
+        existingCustomElements.forEach(el => el.remove());
+
+        // Get custom types from input
+        const customTypes = customTypesInput.value.split(',').map(type => type.trim()).filter(type => type);
+
+        // Create checkbox and quantity input for each custom type
+        customTypes.forEach((type, index) => {
+          const typeId = `type-custom-${index}`;
+          const quantityBoxId = `custom-quantity-box-${index}`;
+
+          // Create checkbox
+          const checkboxLabel = document.createElement('label');
+          checkboxLabel.className = 'checkbox-label custom-type';
+          checkboxLabel.innerHTML = `
+            <input type="checkbox" name="type-custom-${index}" id="${typeId}" />
+            ${type}
+          `;
+          questionTypeGroup.appendChild(checkboxLabel);
+
+          // Create quantity box
+          const quantityDiv = document.createElement('div');
+          quantityDiv.className = 'type-quantity custom-type';
+          quantityDiv.id = quantityBoxId;
+          quantityDiv.style.display = 'none';
+          quantityDiv.innerHTML = `
+            <label for="custom-quantity-${index}" class="quantity-label">How many ${type}?</label>
+            <input type="number" id="custom-quantity-${index}" name="custom-quantity-${index}" min="1" max="15" value="1" class="quantity-input-custom" />
+          `;
+          questionTypeGroup.appendChild(quantityDiv);
+
+          // Toggle quantity box visibility
+          toggleQuantityBox(typeId, quantityBoxId);
+        });
+      });
+
       // FORM SUBMISSION: Validate and send data to Flask
       const quizForm = document.getElementById('quiz-form');
       quizForm.addEventListener('submit', function(e) {
         e.preventDefault(); // Prevent default form submission
 
-        // Get values for question types and quantities
+        // Get values for predefined question types and quantities
         let mcqVal = document.getElementById('type-mcq').checked ? parseInt(document.getElementById('mcq-quantity').value || "0") : 0;
         let shortVal = document.getElementById('type-short').checked ? parseInt(document.getElementById('short-quantity').value || "0") : 0;
         let tfVal = document.getElementById('type-truefalse').checked ? parseInt(document.getElementById('truefalse-quantity').value || "0") : 0;
 
+        // Get values for custom question types
+        const customTypes = customTypesInput.value.split(',').map(type => type.trim()).filter(type => type);
+        const customVals = customTypes.map((type, index) => {
+          const checkbox = document.getElementById(`type-custom-${index}`);
+          const quantityInput = document.getElementById(`custom-quantity-${index}`);
+          return checkbox && checkbox.checked && quantityInput ? parseInt(quantityInput.value || "0") : 0;
+        });
+
         // Validation: no more than 15 for any type
-        if (mcqVal > 15 || shortVal > 15 || tfVal > 15) {
+        if (mcqVal > 15 || shortVal > 15 || tfVal > 15 || customVals.some(val => val > 15)) {
           alert("Maximum allowed per category is 15.");
           return; // Stop submission if validation fails
         }
 
         // Validate that at least one question is requested
-        const totalQuestions = mcqVal + shortVal + tfVal;
+        const totalQuestions = mcqVal + shortVal + tfVal + customVals.reduce((sum, val) => sum + val, 0);
         if (totalQuestions <= 0) {
           document.querySelector('.loading').style.display = 'none';
           document.querySelector('.error').style.display = 'block';
@@ -251,6 +307,12 @@
           question_types.push("True/False");
           type_counts["True/False"] = tfVal;
         }
+        customTypes.forEach((type, index) => {
+          if (document.getElementById(`type-custom-${index}`).checked) {
+            question_types.push(type);
+            type_counts[type] = customVals[index];
+          }
+        });
 
         const parameters = {
           topic,
