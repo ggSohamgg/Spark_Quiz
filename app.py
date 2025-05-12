@@ -6,7 +6,7 @@ app = Flask(__name__)
 # Retrieve the OpenRouter API key from environment variables
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 # Set the endpoint URL for the OpenRouter API
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions  "
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 # Define the model to be used (Qwen 3 30B A3B Free Tier)
 MODEL = "qwen/qwen3-30b-a3b:free"
 
