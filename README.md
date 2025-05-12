@@ -158,12 +158,6 @@ To address this, I switched to Qwen 3 30B A3B, a more efficient model with 30 bi
 
 ---
 
-## 📜 License
-
-This project is licensed under the **MIT License**. See the [LICENSE file](LICENSE) for details.
-
----
-
 ## Acknowledgments
 
 - Powered by **OpenRouter** and **Qwen 3 30B A3B**.
