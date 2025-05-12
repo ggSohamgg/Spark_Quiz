@@ -67,7 +67,7 @@ def generate_quiz(parameters):
     }
     try:
         # Timeout set to 25 seconds to fail before Gunicorn's 60-second timeout
-        response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=25)
+        response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=180)
         response.raise_for_status()
         data = response.json()
         quiz_text = data["choices"][0]["message"]["content"]
