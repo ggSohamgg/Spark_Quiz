@@ -164,7 +164,7 @@ This project is licensed under the **MIT License**. See the [LICENSE file](LICEN
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Powered by **OpenRouter** and **Qwen 3 30B A3B**.
 - Fonts: **Inter** and **Montserrat** via Google Fonts.
