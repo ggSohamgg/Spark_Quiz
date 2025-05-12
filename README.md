@@ -16,7 +16,8 @@
 
 ## 🚀 Try SparkQuiz
 
-Experience SparkQuiz in action! Simply visit the deployed app at [https://sparkquiz-production.up.railway.app/](https://sparkquiz-production.up.railway.app/) to start generating quizzes tailored to your needs.
+Experience SparkQuiz in action! 
+**[🌐 Visit SparkQuiz →](https://sparkquiz-production.up.railway.app/)**
 
 ---
 
