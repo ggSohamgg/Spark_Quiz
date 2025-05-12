@@ -24,9 +24,9 @@ Experience SparkQuiz in action! Simply visit the deployed app at [https://sparkq
 
 SparkQuiz uses the **Qwen 3 30B A3B** model via the **OpenRouter API**. OpenRouter provides a free tier with a limit of **10 requests per minute** and **50 requests per day**, which is sufficient for testing and small-scale use.
 
-### Model: Qwen 3 30B A3B  
-### Provider: OpenRouter  
-### Library: Python `requests` library to make API calls to OpenRouter
+- Model: Qwen 3 30B A3B  
+- Provider: OpenRouter  
+- Library: Python `requests` library to make API calls to OpenRouter
 
 ### Why Qwen 3 30B A3B?
 
@@ -46,7 +46,7 @@ SparkQuiz uses the **Qwen 3 30B A3B** model via the **OpenRouter API**. OpenRout
 - Include Explanations: Yes
 
 **Output (displayed in the browser):**
-
+```
 # Quantum Physics Quiz
 
 ## Multiple Choice Questions
@@ -109,7 +109,7 @@ SparkQuiz uses the **Qwen 3 30B A3B** model via the **OpenRouter API**. OpenRout
 ## Essay Questions
 
 1. Discuss the impact of the Cold War on global politics and its lasting effects on international relations.
-
+```
 ---
 
 ## 🛠️ Prompt Engineering Strategies
