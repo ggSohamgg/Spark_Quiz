@@ -17,8 +17,8 @@
 ## 🚀 Try SparkQuiz
 
 Experience SparkQuiz in action!  
-🔗 **[Visit SparkQuiz (Railway)](https://sparkquiz-production.up.railway.app/)**  
 🔗 **[Visit SparkQuiz (Glitch)](https://sparkquiz.glitch.me/)**
+🔗 **[Visit SparkQuiz (Railway)](https://sparkquiz-production.up.railway.app/)**  
 
 ---
 
