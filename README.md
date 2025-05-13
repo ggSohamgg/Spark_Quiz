@@ -16,8 +16,9 @@
 
 ## 🚀 Try SparkQuiz
 
-Experience SparkQuiz in action! 
-**[Visit SparkQuiz](https://sparkquiz-production.up.railway.app/)**
+Experience SparkQuiz in action!  
+**[Visit SparkQuiz (Railway)](https://sparkquiz-production.up.railway.app/)**  
+**[Visit SparkQuiz (Glitch)](https://sparkquiz.glitch.me/)**
 
 ---
 
@@ -163,4 +164,4 @@ To address this, I switched to Qwen 3 30B A3B, a more efficient model with 30 bi
 
 - Powered by **OpenRouter** and **Qwen 3 30B A3B**.
 - Fonts: **Inter** and **Montserrat** via Google Fonts.
-- Deployed on **Railway**, a platform that simplifies app deployment and infrastructure management.
+- Deployed on **Railway**, **Glitch** a platform that simplifies app deployment and infrastructure management.
