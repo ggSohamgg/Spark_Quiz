@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Retrieve the Gemini API key from environment variables
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-# Set the Gemini 2.5 Flash model name (preview)
+# Set the Gemini 2.5 Flash Preview model name
 MODEL = "gemini-2.5-flash-preview-04-17"
 
 def generate_quiz(parameters):
@@ -59,16 +59,7 @@ def generate_quiz(parameters):
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(model_name=MODEL)
-        # Optionally, you can set a thinking budget (e.g., 1024 tokens) for more complex reasoning
-        # See: https://ai.google.dev/gemini-api/docs/thinking
-        response = model.generate_content(
-            prompt,
-            generation_config={
-                "thinking_config": {
-                    "thinking_budget": 1024
-                }
-            }
-        )
+        response = model.generate_content(prompt)
         quiz_text = response.text
         if not quiz_text or not quiz_text.strip():
             return {
@@ -84,6 +75,7 @@ def generate_quiz(parameters):
 
 @app.route('/')
 def index():
+    # You should have an 'index.html' template in your templates folder
     return render_template('index.html')
 
 @app.route('/generate_quiz', methods=['POST'])
@@ -93,4 +85,4 @@ def generate_quiz_endpoint():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=8080)
