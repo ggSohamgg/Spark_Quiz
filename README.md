@@ -23,16 +23,18 @@ Experience SparkQuiz in action!
 
 ## 🤖 LLM API/Library Used
 
-SparkQuiz uses the **Qwen 3 30B A3B** model via the **OpenRouter API**. OpenRouter provides a free tier with a limit of **10 requests per minute** and **50 requests per day**, which is sufficient for testing and small-scale use.
+SparkQuiz uses the **Gemini 2.5 Flash** model via the **Google Generative AI SDK**. Gemini Flash is designed for real-time applications with **low latency** and **strong reasoning** capabilities, making it ideal for interactive quiz generation.
 
-- Model: Qwen 3 30B A3B  
-- Provider: OpenRouter  
-- Library: Python `requests` library to make API calls to OpenRouter
+- Model: Gemini 2.5 Flash  
+- Provider: Google Generative AI  
+- Library: `google.generativeai` Python SDK to make API calls
 
-### Why Qwen 3 30B A3B?
+### Why Gemini 2.5 Flash?
 
-- **A3B Explained**: A3B stands for "Attention with 3 Billion parameters," a variant of the Qwen 3 series optimized for efficiency. It uses advanced attention mechanisms to reduce computational overhead while maintaining high-quality output, making it faster than larger models like Qwen 2.5 72B Instruct.
-- **Performance**: Qwen 3 30B A3B offers a good balance of speed and accuracy, ideal for free-tier API users with timeout constraints.
+- **Low Latency**: Optimized for fast inference times and interactive experiences like quizzes.
+- **High Accuracy**: Delivers high-quality, structured outputs across diverse knowledge domains.
+- **Scalable**: Works well under usage limits and supports efficient testing with low timeout risks.
+- **Strong Reasoning**: Despite being lightweight, Flash retains Gemini's logical reasoning ability to generate meaningful questions and explanations.
 
 ---
 
@@ -138,20 +140,7 @@ Included fallback messages in the prompt, instructing the LLM to return an error
 
 ---
 
-## ⚠️ Challenges Faced and Solutions
-
-### Challenge: API Timeout with Qwen 2.5 72B Instruct
-Initially, I used Qwen 2.5 72B Instruct for quiz generation due to its high accuracy and capability to handle complex topics. However, as a free-tier user on OpenRouter, I faced frequent API timeouts because of the model’s large size (72 billion parameters). The free tier imposes strict time limits, and the larger model often exceeded these, leading to failed requests and a poor user experience.
-
-### Solution: Switched to Qwen 3 30B A3B
-To address this, I switched to Qwen 3 30B A3B, a more efficient model with 30 billion parameters. Here’s why this was a better choice:
-
-- **A3B Efficiency**: The "A3B" variant uses an optimized attention mechanism (Attention with 3 Billion parameters), reducing computational overhead while maintaining quality. This makes it faster and less likely to timeout on the free tier.
-- **Speed Improvement**: Qwen 3 30B A3B processes requests significantly faster than Qwen 2.5 72B, ensuring responses are returned within the free-tier time limits (typically under 10 seconds).
-- **Quality Retention**: Despite being a smaller model, Qwen 3 30B A3B still delivers high-quality quiz content, with accurate answers and well-structured explanations, making it suitable for SparkQuiz’s needs.
-- **Rate Limits**: The switch also helped manage OpenRouter’s rate limits (10 requests/min, 50/day), as faster responses reduced the likelihood of hitting these limits during testing.
-
-### Additional Challenges
+### Challenges
 
 - **Frontend Parsing**: The LLM sometimes returned inconsistent Markdown formats. I addressed this by writing a robust `parseMarkdown` function in `index.html` to handle variations (e.g., headings, bold text, lists).
 - **Custom Question Types**: Allowing users to add custom question types required dynamic DOM manipulation. I implemented JavaScript to dynamically create checkboxes and quantity inputs, with a limit of 10 custom types to prevent overload.
@@ -159,8 +148,8 @@ To address this, I switched to Qwen 3 30B A3B, a more efficient model with 30 bi
 
 ---
 
-## Acknowledgments
+## 🧠 Acknowledgments
 
-- Powered by **OpenRouter** and **Qwen 3 30B A3B**.
+- Powered by **Google Generative AI** and **Gemini 2.5 Flash**.
 - Fonts: **Inter** and **Montserrat** via Google Fonts.
-- Deployed on **Railway**, **Glitch** a platform that simplifies app deployment and infrastructure management.
+- Deployed on **Railway** and **Glitch** – platforms that simplify app deployment and infrastructure management.
