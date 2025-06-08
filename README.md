@@ -152,4 +152,4 @@ Included fallback messages in the prompt, instructing the LLM to return an error
 
 - Powered by **Google Generative AI** and **Gemini 2.5 Flash**.
 - Fonts: **Inter** and **Montserrat** via Google Fonts.
-- Deployed on **Railway** and **Glitch** – platforms that simplify app deployment and infrastructure management.
+- Deployed on **HF Spaces** and **Railway** – platforms that simplify app deployment and infrastructure management.
