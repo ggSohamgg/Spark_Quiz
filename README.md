@@ -17,7 +17,7 @@
 ## 🚀 Try SparkQuiz
 
 Experience SparkQuiz in action!  
-🔗 **[SparkQuiz on Railway](https://sparkquiz-production.up.railway.app/)** | 🔗 **[SparkQuiz on Hugging Face](https://huggingface.co/spaces/nnsohamnn/Spark_Quiz)**
+🔗 **[SparkQuiz on Hugging Face](https://huggingface.co/spaces/nnsohamnn/Spark_Quiz)** | 🔗 **[SparkQuiz on Railway](https://sparkquiz-production.up.railway.app/)**
 
 ---
 
