@@ -7,7 +7,7 @@ app = Flask(__name__)
 # Retrieve the Gemini API key from environment variables
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 # Set the Gemini 2.5 Flash Preview model name
-MODEL = "gemini-2.5-flash-preview-04-17"
+MODEL = "gemini-2.5-flash"
 
 def generate_quiz(parameters):
     """
